@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentlens-failure-corpus"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["anthropic>=0.40", "pyyaml", "jsonschema", "pyarrow", "huggingface_hub"]
+
+[project.scripts]
+corpus-nightly = "corpus.scheduler:main"
+
+# Flat layout with data/ and site/ next to the package: tell setuptools what is code.
+[tool.setuptools.packages.find]
+include = ["corpus*"]

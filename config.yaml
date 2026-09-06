@@ -1,0 +1,36 @@
+# Edit once. Everything else is driven from the ledger.
+models:
+  agent: claude-sonnet-5
+  agent_fallback: claude-sonnet-4-6
+  labeler: claude-haiku-4-5-20251001
+# USD per million tokens. Worst-case Sonnet pricing on purpose: the model can only undershoot.
+prices:
+  claude-sonnet-5:          {input: 3.00, output: 15.00, cache_read: 0.30, cache_write: 3.75}
+  claude-sonnet-4-6:        {input: 3.00, output: 15.00, cache_read: 0.30, cache_write: 3.75}
+  claude-haiku-4-5-20251001: {input: 1.00, output: 5.00, cache_read: 0.10, cache_write: 1.25}
+budget:
+  total_cap_usd: 1950
+  daily_cap_usd: 40
+  end_date: "2026-11-01"         # set to ~8 weeks from first run
+  min_nightly_usd: 2             # below this the scheduler just exits
+  nightly_deadline_seconds: 18000  # 5h: a stalled night must not block the next one
+episode:
+  max_turns: 30
+  max_total_tokens: 600000
+  wall_clock_seconds: 1200
+  max_tokens_per_turn: 4096
+  concurrency: 2
+agentlens:
+  enabled: true                  # emit agentlens/v1 spans into every trace (always on, local)
+  endpoint: "http://localhost:8766/api/v1/traces"   # also POST there when a server is up
+  timeout_seconds: 2             # a dead server costs this much per episode and nothing else
+families:
+  swebench:   {weight: 0.40, enabled: false}   # enable after Docker dry run
+  tools:      {weight: 0.30, enabled: true}
+  flakiness:  {weight: 0.30, enabled: true, repeats: 5}   # throttle raises repeats to hit budget
+deadman:
+  zero_trace_nights: 3
+  failed_push_nights: 3
+publish:
+  data_repo_dir: "."             # this repo; traces/ and site/stats.json are committed
+  hf_dataset: ""                 # e.g. "ArkFelix7/agentlens-failure-corpus"; blank = skip

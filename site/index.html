@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AgentLens Failure Corpus</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--ink:#1c2230;--paper:#f7f8f6;--rule:#c9cfc6;--fail:#b3412c;--pass:#2f6f4f;--mute:#6a7268}
+@media(prefers-color-scheme:dark){:root{--ink:#e6e8e3;--paper:#161a18;--rule:#3a423c;--mute:#9aa397}}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 "Iowan Old Style","Palatino Linotype",Georgia,serif;max-width:72ch;padding:3rem 1.25rem 5rem;margin-inline:auto}
+h1{font-weight:400;font-size:2.1rem;letter-spacing:-.01em;margin:0 0 .25rem}h1 b{font-weight:700}
+.sub{color:var(--mute);margin:0 0 2.5rem}
+.gauge{border:1px solid var(--rule);height:8px;margin:.5rem 0 2rem;position:relative}.gauge i{position:absolute;inset:0;width:0;background:var(--ink)}
+table{width:100%;border-collapse:collapse;margin:0 0 2.5rem;font-size:.95rem}td,th{text-align:left;padding:.35rem 0;border-bottom:1px solid var(--rule)}th{font-weight:400;color:var(--mute)}td.n{text-align:right;font-variant-numeric:tabular-nums}
+h2{font-weight:400;font-size:1.25rem;margin:2.5rem 0 .75rem}canvas{width:100%!important;max-height:280px}
+.stopped{border:2px solid var(--fail);padding:.75rem 1rem;margin:0 0 2rem}
+</style></head><body>
+<h1><b>AgentLens</b> Failure Corpus</h1>
+<p class="sub">Agents run every night against fixed tasks. Every trace is kept, every failure is labeled. Nobody is watching this run.</p>
+<div id="stopped" class="stopped" hidden>Run has stopped. Data below is final.</div>
+<p id="headline">Loading…</p><div class="gauge"><i id="gauge"></i></div>
+<h2>Per task family</h2><table id="fam"><tr><th>family</th><th>episodes</th><th>pass rate</th><th>avg cost</th></tr></table>
+<h2>How failures split</h2><table id="lab"><tr><th>label</th><th>count</th></tr></table>
+<h2>Pass rate by week, flakiness tasks</h2><canvas id="flake"></canvas>
+<h2>Nightly spend</h2><canvas id="spend"></canvas>
+<script>
+fetch('stats.json?'+Date.now()).then(r=>r.json()).then(s=>{
+  const $=id=>document.getElementById(id), n=x=>x.toLocaleString(), pct=x=>(100*(x||0)).toFixed(0)+'%';
+  $('headline').textContent=`${n(s.episodes)} traces so far. $${s.spent_total.toFixed(0)} of $${s.total_cap} spent. Updated ${s.generated.slice(0,10)}.`;
+  $('gauge').style.width=Math.min(100,100*s.spent_total/s.total_cap)+'%';
+  if(s.stopped)$('stopped').hidden=false;
+  s.by_family.forEach(f=>$('fam').insertAdjacentHTML('beforeend',`<tr><td>${f.family}</td><td class=n>${n(f.n)}</td><td class=n>${pct(f.pass_rate)}</td><td class=n>$${(f.avg_cost||0).toFixed(3)}</td></tr>`));
+  s.labels.forEach(l=>$('lab').insertAdjacentHTML('beforeend',`<tr><td>${l.label}</td><td class=n>${n(l.n)}</td></tr>`));
+  const weeks=[...new Set(s.flakiness.map(f=>f.week))], tasks=[...new Set(s.flakiness.map(f=>f.task_id))];
+  const css=v=>getComputedStyle(document.body).getPropertyValue(v);
+  new Chart($('flake'),{type:'line',data:{labels:weeks,datasets:tasks.map((t,i)=>({label:t,data:weeks.map(w=>{const r=s.flakiness.find(f=>f.week===w&&f.task_id===t);return r?100*r.pass_rate:null}),borderColor:`hsl(${(i*47)%360} 40% 45%)`,tension:.2}))},options:{scales:{y:{min:0,max:100}},plugins:{legend:{display:tasks.length<=8}}}});
+  new Chart($('spend'),{type:'bar',data:{labels:s.nightly.map(x=>x.date.slice(5)),datasets:[{label:'spent',data:s.nightly.map(x=>x.spent),backgroundColor:css('--ink')},{label:'budget',data:s.nightly.map(x=>x.budget),type:'line',borderColor:css('--mute'),pointRadius:0}]},options:{plugins:{legend:{display:false}}}});
+});
+</script></body></html>

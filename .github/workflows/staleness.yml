@@ -1,0 +1,17 @@
+# Your only monitoring: opens an issue if stats.json hasn't changed in 48h.
+name: staleness
+on:
+  schedule: [{cron: "0 14 * * *"}]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions: {issues: write, contents: read}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - run: |
+          age=$(( $(date +%s) - $(git log -1 --format=%ct -- site/stats.json) ))
+          if [ $age -gt 172800 ]; then
+            gh issue create -t "Corpus stale: no stats update in 48h" -b "Host or pipeline is down. Check logs/ on the box." || true
+          fi
+        env: {GH_TOKEN: "${{ github.token }}"}

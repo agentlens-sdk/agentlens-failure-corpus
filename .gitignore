@@ -1,0 +1,7 @@
+data/ledger.sqlite
+data/traces.parquet
+logs/
+__pycache__/
+.env
+.venv/
+*.egg-info/
