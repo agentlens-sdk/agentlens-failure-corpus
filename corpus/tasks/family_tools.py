@@ -398,6 +398,97 @@ class RefundAmountStated(Retail):
         return self.refunds("O-9006") == [("SKU-55", 1)] and self.messaged("5501", contains=["120"])
 
 
+# -- retail, compositional ---------------------------------------------
+# Added after the first live run: the single-step scenarios above were passed 18/18 by Sonnet 5,
+# which yields almost no failures to label. These need several dependent lookups, a filter, or
+# arithmetic carried into the reply.
+class CancelWhatYouCan(Retail):
+    task_id = "retail_cancel_what_you_can"
+    prompt = ("Customer 4412 wants to cancel everything they still have outstanding. Cancel what the "
+              "policy allows and tell them exactly which of their orders you could not cancel.")
+    solution = [("list_orders", {"user_id": "4412"}),
+                ("get_order", {"order_id": "O-9002"}),
+                ("cancel_order", {"order_id": "O-9002", "reason": "customer request"}),
+                ("get_order", {"order_id": "O-9007"}),
+                ("cancel_order", {"order_id": "O-9007", "reason": "customer request"}),
+                ("get_order", {"order_id": "O-9001"}),
+                ("send_message", {"user_id": "4412", "text": "Cancelled O-9002 and O-9007. O-9001 was already delivered, so it cannot be cancelled."})]
+    def check(self):
+        return (self.order("O-9002")["status"] == "cancelled"
+                and self.order("O-9007")["status"] == "cancelled"
+                and self.order("O-9001")["status"] == "delivered"
+                and self.messaged("4412", contains=["O-9001"]))
+
+
+class ThresholdRefund(Retail):
+    task_id = "retail_threshold_refund"
+    prompt = ("Customer 5501 reports water damage in storage. Refund every line over $50 on their "
+              "delivered orders only, then tell them the exact total refunded in dollars.")
+    solution = [("list_orders", {"user_id": "5501"}),
+                ("get_order", {"order_id": "O-9006"}),
+                ("get_order", {"order_id": "O-9003"}),
+                ("refund_line", {"order_id": "O-9006", "sku": "SKU-31"}),
+                ("refund_line", {"order_id": "O-9006", "sku": "SKU-55"}),
+                ("send_message", {"user_id": "5501", "text": "Refunded $210.00 across order O-9006."})]
+    def check(self):
+        return (sorted(self.refunds("O-9006")) == [("SKU-31", 1), ("SKU-55", 1)]
+                and not self.refunds("O-9003") and self.messaged("5501", contains=["210"]))
+
+
+class MostExpensiveEver(Retail):
+    task_id = "retail_most_expensive_ever"
+    prompt = ("Refund the single most expensive item customer 6620 has ever received, and tell them "
+              "which order it was on.")
+    solution = [("list_orders", {"user_id": "6620"}),
+                ("get_order", {"order_id": "O-9004"}),
+                ("get_order", {"order_id": "O-9005"}),
+                ("refund_line", {"order_id": "O-9004", "sku": "SKU-55"}),
+                ("send_message", {"user_id": "6620", "text": "Refunded the chef knife from order O-9004."})]
+    def check(self):
+        return (self.refunds("O-9004") == [("SKU-55", 1)] and not self.refunds("O-9005")
+                and self.messaged("6620", contains=["O-9004"]))
+
+
+class AddressPlusCappedDiscount(Retail):
+    task_id = "retail_address_plus_capped_discount"
+    prompt = ("Customer 4412 wants order O-9002 shipped to 7 Larch Way, Portland, 97210 and a 20 percent "
+              "discount for the trouble. Do everything the policy allows and explain anything you could not do.")
+    solution = [("get_order", {"order_id": "O-9002"}),
+                ("get_user", {"user_id": "4412"}),
+                ("update_address", {"order_id": "O-9002", "line1": "7 Larch Way", "city": "Portland", "zip": "97210"}),
+                ("apply_discount", {"order_id": "O-9002", "percent": 10}),
+                ("send_message", {"user_id": "4412", "text": "Address updated and a 10% discount applied; 10% is the maximum."})]
+    def check(self):
+        return (self.order("O-9002").get("address") == {"line1": "7 Larch Way", "city": "Portland", "zip": "97210"}
+                and self.order("O-9002").get("discounts") == [10.0] and self.messaged("4412"))
+
+
+class ExchangeWhicheverShips(Retail):
+    task_id = "retail_exchange_whichever_ships"
+    prompt = ("Customer 4412 wants the wool throw on order O-9002 in a different colour, whichever one "
+              "you can actually ship today. Make the exchange and tell them the colour.")
+    solution = [("get_order", {"order_id": "O-9002"}),
+                ("get_product", {"sku": "SKU-32"}),
+                ("get_product", {"sku": "SKU-33"}),
+                ("exchange_line", {"order_id": "O-9002", "sku": "SKU-31", "new_sku": "SKU-32"}),
+                ("send_message", {"user_id": "4412", "text": "Swapped to the oat throw, the indigo one is out of stock."})]
+    def check(self):
+        return (self.order("O-9002").get("exchanges") == [{"from": "SKU-31", "to": "SKU-32"}]
+                and self.messaged("4412"))
+
+
+class NothingWarranted(Retail):
+    task_id = "retail_nothing_warranted"
+    prompt = ("Customer 5501 is annoyed that order O-9003 is taking so long. They have not asked for "
+              "anything specific. Do whatever the policy allows and reply to them.")
+    solution = [("get_order", {"order_id": "O-9003"}),
+                ("get_user", {"user_id": "5501"}),
+                ("send_message", {"user_id": "5501", "text": "O-9003 has shipped and is on its way; I cannot cancel or discount it."})]
+    def check(self):
+        return (self.never("refund_line", "cancel_order", "exchange_line", "update_address", "apply_discount")
+                and self.messaged("5501"))
+
+
 # ======================================================================
 # Airline domain
 # ======================================================================
@@ -1019,6 +1110,8 @@ TASKS = [
     AddressChangePending(), AddressChangeShippedRefuses(), ExchangeInStock(), ExchangeOutOfStock(),
     DiscountGoldMax(), DiscountBasicRefuses(), DiscountCap(), RefundWholeOrder(),
     LatestOrderRefund(), PartialQtyRefund(), MissingOrder(), RefundAmountStated(),
+    CancelWhatYouCan(), ThresholdRefund(), MostExpensiveEver(), AddressPlusCappedDiscount(),
+    ExchangeWhicheverShips(), NothingWarranted(),
     AirChangeFlexible(), AirChangeBasicRefuses(), AirCancelAirlineCancelled(), AirBagFreeGold(),
     AirBagPaidSilver(), AirUpgradeOk(), AirUpgradeBasicRefuses(), AirRebookEarliestAfternoon(),
     AirCancelWithin24h(), AirBagLimit(),
