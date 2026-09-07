@@ -1,43 +1,144 @@
 {
- "spent_total": 0.69,
- "episodes": 36,
+ "spent_total": 2.12,
+ "episodes": 170,
  "by_family": [
   {
    "family": "flakiness",
-   "n": 3,
+   "n": 84,
    "pass_rate": 1.0,
-   "avg_cost": 0.006333000000000001
+   "avg_cost": 0.006275
   },
   {
    "family": "tools",
-   "n": 33,
-   "pass_rate": 1.0,
-   "avg_cost": 0.018792222727272725
+   "n": 86,
+   "pass_rate": 0.9883720930232558,
+   "avg_cost": 0.016814651162790697
   }
  ],
- "labels": [],
+ "labels": [
+  {
+   "label": "premature_stop",
+   "n": 1
+  }
+ ],
  "nightly": [],
  "flakiness": [
   {
    "week": "2026-36",
    "task_id": "balanced_brackets",
    "pass_rate": 1.0,
-   "n": 1
+   "n": 5
+  },
+  {
+   "week": "2026-36",
+   "task_id": "binary_search",
+   "pass_rate": 1.0,
+   "n": 5
+  },
+  {
+   "week": "2026-36",
+   "task_id": "compress_ranges",
+   "pass_rate": 1.0,
+   "n": 5
+  },
+  {
+   "week": "2026-36",
+   "task_id": "dedupe_preserve_order",
+   "pass_rate": 1.0,
+   "n": 4
+  },
+  {
+   "week": "2026-36",
+   "task_id": "fix_char_counter",
+   "pass_rate": 1.0,
+   "n": 5
+  },
+  {
+   "week": "2026-36",
+   "task_id": "fix_chunk_tail",
+   "pass_rate": 1.0,
+   "n": 4
+  },
+  {
+   "week": "2026-36",
+   "task_id": "fix_mutable_default",
+   "pass_rate": 1.0,
+   "n": 4
+  },
+  {
+   "week": "2026-36",
+   "task_id": "fix_sort_by_key",
+   "pass_rate": 1.0,
+   "n": 5
+  },
+  {
+   "week": "2026-36",
+   "task_id": "flatten_nested",
+   "pass_rate": 1.0,
+   "n": 4
+  },
+  {
+   "week": "2026-36",
+   "task_id": "int_to_roman",
+   "pass_rate": 1.0,
+   "n": 3
+  },
+  {
+   "week": "2026-36",
+   "task_id": "longest_common_prefix",
+   "pass_rate": 1.0,
+   "n": 5
   },
   {
    "week": "2026-36",
    "task_id": "merge_intervals",
    "pass_rate": 1.0,
-   "n": 1
+   "n": 3
+  },
+  {
+   "week": "2026-36",
+   "task_id": "refactor_first_even",
+   "pass_rate": 1.0,
+   "n": 5
+  },
+  {
+   "week": "2026-36",
+   "task_id": "refactor_grade_table",
+   "pass_rate": 1.0,
+   "n": 4
   },
   {
    "week": "2026-36",
    "task_id": "rle_encode",
    "pass_rate": 1.0,
-   "n": 1
+   "n": 6
+  },
+  {
+   "week": "2026-36",
+   "task_id": "roman_to_int",
+   "pass_rate": 1.0,
+   "n": 4
+  },
+  {
+   "week": "2026-36",
+   "task_id": "spiral_order",
+   "pass_rate": 1.0,
+   "n": 5
+  },
+  {
+   "week": "2026-36",
+   "task_id": "top_k_words",
+   "pass_rate": 1.0,
+   "n": 4
+  },
+  {
+   "week": "2026-36",
+   "task_id": "two_sum",
+   "pass_rate": 1.0,
+   "n": 4
   }
  ],
- "generated": "2026-09-07T17:56:13.504131+00:00",
+ "generated": "2026-09-07T18:10:28.563701+00:00",
  "total_cap": 1950,
  "stopped": null
 }

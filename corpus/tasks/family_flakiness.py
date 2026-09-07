@@ -398,11 +398,16 @@ def join_words(words, sep):
         out = out[:-len(sep)]
     return out
 """
+    # The empty separator is the whole point: out[:-0] is out[:0], so the original returns "".
+    # A naive sep.join(words) returns "ab" and is therefore NOT behaviour-preserving.
     cases = [((["a", "b", "c"], "-"), "a-b-c"), (([], ","), ""), ((["solo"], "::"), "solo"),
-             ((["a", "b"], ""), "ab")]
+             ((["a", "b"], ""), "")]
     answer = """
 def join_words(words, sep):
-    return sep.join(words)
+    out = "".join(w + sep for w in words)
+    if out:
+        out = out[:-len(sep)]
+    return out
 """
 
 
