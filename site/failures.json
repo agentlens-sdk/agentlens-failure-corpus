@@ -8,8 +8,8 @@
   "turns": 2,
   "cost_usd": 0.005367,
   "label": "premature_stop",
-  "confidence": null,
-  "evidence": null,
+  "confidence": 0.85,
+  "evidence": "Turn 0: Submitted initial solution without testing or validation. Turn 1: Claimed completion without waiting for feedback or running the code against test cases.",
   "prompt": "Rewrite this so it builds the result without repeated string concatenation in a loop.\nBehaviour, including the trailing-separator handling, must be identical. Submit the whole rewritten\nfunction as join_words.\n\ndef join_words(words, sep):\n    out = \"\"\n    for w in words:\n        out = out + w + sep\n    if out:\n        out = out[:-len(sep)]\n    return out\n",
   "trace": [
    {
@@ -39,8 +39,8 @@
   "turns": 2,
   "cost_usd": 0.005367,
   "label": "premature_stop",
-  "confidence": null,
-  "evidence": null,
+  "confidence": 0.85,
+  "evidence": "Turn [0]: Agent submitted initial code without iterating. Turn [1]: Confirmed submission immediately without testing/refactoring the join implementation for edge cases or performance improvements, which refactoring tasks typically require.",
   "prompt": "Rewrite this so it builds the result without repeated string concatenation in a loop.\nBehaviour, including the trailing-separator handling, must be identical. Submit the whole rewritten\nfunction as join_words.\n\ndef join_words(words, sep):\n    out = \"\"\n    for w in words:\n        out = out + w + sep\n    if out:\n        out = out[:-len(sep)]\n    return out\n",
   "trace": [
    {
@@ -69,9 +69,9 @@
   "outcome": "fail",
   "turns": 3,
   "cost_usd": 0.014034,
-  "label": "premature_stop",
-  "confidence": null,
-  "evidence": null,
+  "label": "wrong_target",
+  "confidence": 0.85,
+  "evidence": "Turn 1: Agent created event at 12pm without verifying if that slot was free. Task requires checking NO double-booking, but agent only listed existing events without confirming 12pm was available before scheduling.",
   "prompt": "Book a 'coffee with Pat' on Tuesday at 10am and tell me the time you booked.",
   "trace": [
    {
@@ -112,8 +112,8 @@
   "turns": 4,
   "cost_usd": 0.0231216,
   "label": "premature_stop",
-  "confidence": null,
-  "evidence": null,
+  "confidence": 0.85,
+  "evidence": "Turn [3] claims discount couldn't be applied, but no attempt was made to apply the capped 10% discount. Task requires applying a discount; agent only informed user of limitation without completing the discount action.",
   "prompt": "Customer 4412 wants order O-9002 shipped to 7 Larch Way, Portland, 97210 and a 20 percent discount for the trouble. Do everything the policy allows and explain anything you could not do.",
   "trace": [
    {
@@ -170,8 +170,8 @@
   "turns": 2,
   "cost_usd": 0.005367,
   "label": "premature_stop",
-  "confidence": null,
-  "evidence": null,
+  "confidence": 0.85,
+  "evidence": "Turn 0-1: Agent submitted code immediately without testing or validation. No trace of checking edge cases (empty list, None values) or comparing with requirements.",
   "prompt": "Rewrite this so it builds the result without repeated string concatenation in a loop.\nBehaviour, including the trailing-separator handling, must be identical. Submit the whole rewritten\nfunction as join_words.\n\ndef join_words(words, sep):\n    out = \"\"\n    for w in words:\n        out = out + w + sep\n    if out:\n        out = out[:-len(sep)]\n    return out\n",
   "trace": [
    {
@@ -201,8 +201,8 @@
   "turns": 2,
   "cost_usd": 0.005367,
   "label": "premature_stop",
-  "confidence": null,
-  "evidence": null,
+  "confidence": 0.85,
+  "evidence": "Turn 0-1: Agent submitted solution without testing/refactoring. No iteration or improvement attempted despite 'refactor_string_join' task implying optimization needed.",
   "prompt": "Rewrite this so it builds the result without repeated string concatenation in a loop.\nBehaviour, including the trailing-separator handling, must be identical. Submit the whole rewritten\nfunction as join_words.\n\ndef join_words(words, sep):\n    out = \"\"\n    for w in words:\n        out = out + w + sep\n    if out:\n        out = out[:-len(sep)]\n    return out\n",
   "trace": [
    {
@@ -231,9 +231,9 @@
   "outcome": "fail",
   "turns": 2,
   "cost_usd": 0.0068520000000000005,
-  "label": "wrong_target",
-  "confidence": null,
-  "evidence": null,
+  "label": "hallucinated_tool",
+  "confidence": 0.85,
+  "evidence": "Turn 0-1: Agent claims join-based refactor is 'functionally equivalent' but provides no verification. The assertion about trailing-separator handling is unsupported\u2014no test execution shown. Assistant hallucinates confidence in correctness without evidence.",
   "prompt": "Rewrite this so it builds the result without repeated string concatenation in a loop.\nBehaviour, including the trailing-separator handling, must be identical. Submit the whole rewritten\nfunction as join_words.\n\ndef join_words(words, sep):\n    out = \"\"\n    for w in words:\n        out = out + w + sep\n    if out:\n        out = out[:-len(sep)]\n    return out\n",
   "trace": [
    {
@@ -263,8 +263,8 @@
   "turns": 3,
   "cost_usd": 0.021873,
   "label": "premature_stop",
-  "confidence": null,
-  "evidence": null,
+  "confidence": 0.92,
+  "evidence": "Turn [2]: Agent gave up after encountering error with Pat's calendar. Should have asked user for clarification or attempted alternative approaches (e.g., try different calendar name variations) before stopping work on finding common free hour.",
   "prompt": "Book a 'design review sync' on Thursday at an hour when both my calendar and Pat's are free, and tell me which hour you picked.",
   "trace": [
    {

@@ -18,10 +18,14 @@
  "labels": [
   {
    "label": "premature_stop",
-   "n": 7
+   "n": 6
   },
   {
    "label": "wrong_target",
+   "n": 1
+  },
+  {
+   "label": "hallucinated_tool",
    "n": 1
   }
  ],
@@ -680,7 +684,7 @@
    "n": 11
   }
  ],
- "generated": "2026-09-07T19:59:43.502577+00:00",
+ "generated": "2026-09-07T20:03:40.454194+00:00",
  "total_cap": 1950,
  "stopped": null
 }
