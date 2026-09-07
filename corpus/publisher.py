@@ -5,7 +5,7 @@ from . import ledger
 from .ledger import CFG
 
 ROOT = Path(__file__).parent.parent
-PUBLISHED = ("data/traces", "site/stats.json", "STOPPED")
+PUBLISHED = ("data/traces", "site/stats.json", "site/failures.json", "STOPPED")
 
 
 def write_stats():
@@ -15,7 +15,59 @@ def write_stats():
     stopped = ROOT / "STOPPED"
     s["stopped"] = stopped.read_text().strip() if stopped.exists() else None
     (ROOT / "site" / "stats.json").write_text(json.dumps(s, indent=1))
+    write_failures()
     return s
+
+
+def _task_prompts():
+    """task_id -> prompt, so a reader can see what was actually asked."""
+    from .tasks import load_family
+    out = {}
+    for fam in ("tools", "flakiness", "swebench"):
+        try:
+            for t in load_family(fam):
+                out[t.task_id] = t.prompt
+        except Exception:
+            pass
+    return out
+
+
+def _compact_turns(trace, max_turns=14):
+    """Turn-by-turn view: assistant text, the tool calls it made, and what came back."""
+    turns = []
+    for i, t in enumerate(trace.get("turns", [])[:max_turns]):
+        text, calls = [], []
+        results = {r.get("tool_use_id"): r.get("content") for r in t.get("tool_results", [])}
+        for b in t.get("assistant", []):
+            if b.get("type") == "text" and b.get("text", "").strip():
+                text.append(b["text"][:600])
+            elif b.get("type") == "tool_use":
+                calls.append({"name": b.get("name"),
+                              "input": json.dumps(b.get("input"), default=str)[:300],
+                              "result": str(results.get(b.get("id"), ""))[:300]})
+        turns.append({"i": i, "text": " ".join(text), "calls": calls})
+    return turns
+
+
+def write_failures(limit=40):
+    """site/failures.json: the corpus is the traces, so the dashboard has to be able to show them.
+    Pages serves only site/, so the relevant slice is copied here rather than linked into data/."""
+    prompts = _task_prompts()
+    rows = ledger.conn().execute(
+        "SELECT episode_id, ts, family, task_id, outcome, turns, cost_usd, label, confidence, evidence, trace_path "
+        "FROM episodes WHERE outcome!='pass' ORDER BY ts DESC LIMIT ?", (limit,)).fetchall()
+    out = []
+    for (eid, ts, fam, task, outcome, turns, cost, label, conf, ev, path) in rows:
+        item = {"episode_id": eid, "ts": ts, "family": fam, "task_id": task, "outcome": outcome,
+                "turns": turns, "cost_usd": cost, "label": label, "confidence": conf,
+                "evidence": ev, "prompt": prompts.get(task, ""), "trace": []}
+        try:
+            item["trace"] = _compact_turns(json.loads(Path(path).read_text()))
+        except Exception:
+            pass
+        out.append(item)
+    (ROOT / "site" / "failures.json").write_text(json.dumps(out, indent=1))
+    return out
 
 
 def _git(*args):

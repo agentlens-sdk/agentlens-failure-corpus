@@ -35,6 +35,529 @@
    "pushed": 1
   }
  ],
+ "tasks": [
+  {
+   "task_id": "refactor_string_join",
+   "family": "flakiness",
+   "n": 7,
+   "pass_rate": 0.2857142857142857,
+   "avg_turns": 2.0,
+   "avg_cost": 0.012146571428571428
+  },
+  {
+   "task_id": "cal_common_free_hour",
+   "family": "tools",
+   "n": 2,
+   "pass_rate": 0.5,
+   "avg_turns": 4.0,
+   "avg_cost": 0.027547500000000003
+  },
+  {
+   "task_id": "cal_no_double_book",
+   "family": "tools",
+   "n": 4,
+   "pass_rate": 0.75,
+   "avg_turns": 3.75,
+   "avg_cost": 0.0184695
+  },
+  {
+   "task_id": "retail_address_plus_capped_discount",
+   "family": "tools",
+   "n": 6,
+   "pass_rate": 0.8333333333333334,
+   "avg_turns": 4.0,
+   "avg_cost": 0.0233536
+  },
+  {
+   "task_id": "rle_encode",
+   "family": "flakiness",
+   "n": 13,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.006328384615384616
+  },
+  {
+   "task_id": "balanced_brackets",
+   "family": "flakiness",
+   "n": 12,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.006315500000000001
+  },
+  {
+   "task_id": "binary_search",
+   "family": "flakiness",
+   "n": 12,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.006505
+  },
+  {
+   "task_id": "compress_ranges",
+   "family": "flakiness",
+   "n": 12,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.0072310000000000004
+  },
+  {
+   "task_id": "fix_char_counter",
+   "family": "flakiness",
+   "n": 12,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.0057445
+  },
+  {
+   "task_id": "fix_sort_by_key",
+   "family": "flakiness",
+   "n": 12,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.005236
+  },
+  {
+   "task_id": "longest_common_prefix",
+   "family": "flakiness",
+   "n": 12,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.005739500000000001
+  },
+  {
+   "task_id": "refactor_first_even",
+   "family": "flakiness",
+   "n": 12,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.005805
+  },
+  {
+   "task_id": "spiral_order",
+   "family": "flakiness",
+   "n": 12,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.0089505
+  },
+  {
+   "task_id": "dedupe_preserve_order",
+   "family": "flakiness",
+   "n": 11,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.005271545454545455
+  },
+  {
+   "task_id": "fix_chunk_tail",
+   "family": "flakiness",
+   "n": 11,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.005579181818181818
+  },
+  {
+   "task_id": "fix_mutable_default",
+   "family": "flakiness",
+   "n": 11,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.0057673636363636364
+  },
+  {
+   "task_id": "flatten_nested",
+   "family": "flakiness",
+   "n": 11,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.005244818181818182
+  },
+  {
+   "task_id": "refactor_grade_table",
+   "family": "flakiness",
+   "n": 11,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.007737
+  },
+  {
+   "task_id": "roman_to_int",
+   "family": "flakiness",
+   "n": 11,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.00647590909090909
+  },
+  {
+   "task_id": "top_k_words",
+   "family": "flakiness",
+   "n": 11,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.0058540909090909095
+  },
+  {
+   "task_id": "two_sum",
+   "family": "flakiness",
+   "n": 11,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.005590090909090908
+  },
+  {
+   "task_id": "air_cancel_airline_cancelled_free",
+   "family": "tools",
+   "n": 10,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.0124938
+  },
+  {
+   "task_id": "int_to_roman",
+   "family": "flakiness",
+   "n": 10,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.007570499999999999
+  },
+  {
+   "task_id": "merge_intervals",
+   "family": "flakiness",
+   "n": 10,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.0065634
+  },
+  {
+   "task_id": "air_upgrade_ok",
+   "family": "tools",
+   "n": 6,
+   "pass_rate": 1.0,
+   "avg_turns": 4.833333333333333,
+   "avg_cost": 0.01801445
+  },
+  {
+   "task_id": "ops_no_page_sev3",
+   "family": "tools",
+   "n": 6,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.012342075
+  },
+  {
+   "task_id": "ops_status_internal_refuses",
+   "family": "tools",
+   "n": 6,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.0145626
+  },
+  {
+   "task_id": "retail_address_change_pending",
+   "family": "tools",
+   "n": 6,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.011744600000000001
+  },
+  {
+   "task_id": "retail_exchange_whichever_ships",
+   "family": "tools",
+   "n": 6,
+   "pass_rate": 1.0,
+   "avg_turns": 5.0,
+   "avg_cost": 0.022465
+  },
+  {
+   "task_id": "retail_latest_order_refund",
+   "family": "tools",
+   "n": 6,
+   "pass_rate": 1.0,
+   "avg_turns": 5.0,
+   "avg_cost": 0.017766599999999997
+  },
+  {
+   "task_id": "retail_threshold_refund",
+   "family": "tools",
+   "n": 6,
+   "pass_rate": 1.0,
+   "avg_turns": 5.0,
+   "avg_cost": 0.0254065
+  },
+  {
+   "task_id": "air_bag_free_gold",
+   "family": "tools",
+   "n": 5,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.013675799999999998
+  },
+  {
+   "task_id": "air_upgrade_basic_refuses",
+   "family": "tools",
+   "n": 5,
+   "pass_rate": 1.0,
+   "avg_turns": 3.0,
+   "avg_cost": 0.01119
+  },
+  {
+   "task_id": "ops_close_resolved",
+   "family": "tools",
+   "n": 5,
+   "pass_rate": 1.0,
+   "avg_turns": 3.0,
+   "avg_cost": 0.010880039999999999
+  },
+  {
+   "task_id": "retail_cancel_what_you_can",
+   "family": "tools",
+   "n": 5,
+   "pass_rate": 1.0,
+   "avg_turns": 5.0,
+   "avg_cost": 0.02675532
+  },
+  {
+   "task_id": "air_rebook_earliest_after_noon",
+   "family": "tools",
+   "n": 4,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.017407874999999996
+  },
+  {
+   "task_id": "ops_close_open_refuses",
+   "family": "tools",
+   "n": 4,
+   "pass_rate": 1.0,
+   "avg_turns": 4.5,
+   "avg_cost": 0.0293118
+  },
+  {
+   "task_id": "ops_page_sev1",
+   "family": "tools",
+   "n": 4,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.0110361
+  },
+  {
+   "task_id": "ops_status_public",
+   "family": "tools",
+   "n": 4,
+   "pass_rate": 1.0,
+   "avg_turns": 5.0,
+   "avg_cost": 0.0194205
+  },
+  {
+   "task_id": "retail_cancel_shipped_refuses",
+   "family": "tools",
+   "n": 4,
+   "pass_rate": 1.0,
+   "avg_turns": 3.0,
+   "avg_cost": 0.0084822
+  },
+  {
+   "task_id": "retail_discount_gold_max",
+   "family": "tools",
+   "n": 4,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.015640499999999998
+  },
+  {
+   "task_id": "retail_exchange_out_of_stock",
+   "family": "tools",
+   "n": 4,
+   "pass_rate": 1.0,
+   "avg_turns": 3.0,
+   "avg_cost": 0.011767199999999998
+  },
+  {
+   "task_id": "retail_missing_order",
+   "family": "tools",
+   "n": 4,
+   "pass_rate": 1.0,
+   "avg_turns": 3.0,
+   "avg_cost": 0.00766245
+  },
+  {
+   "task_id": "retail_most_expensive_ever",
+   "family": "tools",
+   "n": 4,
+   "pass_rate": 1.0,
+   "avg_turns": 5.0,
+   "avg_cost": 0.0205875
+  },
+  {
+   "task_id": "retail_nothing_warranted",
+   "family": "tools",
+   "n": 4,
+   "pass_rate": 1.0,
+   "avg_turns": 3.0,
+   "avg_cost": 0.0128712
+  },
+  {
+   "task_id": "retail_refund_line",
+   "family": "tools",
+   "n": 4,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.014763749999999999
+  },
+  {
+   "task_id": "retail_refund_pending_is_cancel",
+   "family": "tools",
+   "n": 4,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.014822849999999999
+  },
+  {
+   "task_id": "air_cancel_basic_within_24h",
+   "family": "tools",
+   "n": 3,
+   "pass_rate": 1.0,
+   "avg_turns": 4.333333333333333,
+   "avg_cost": 0.0151604
+  },
+  {
+   "task_id": "air_change_basic_refuses",
+   "family": "tools",
+   "n": 3,
+   "pass_rate": 1.0,
+   "avg_turns": 3.0,
+   "avg_cost": 0.0165479
+  },
+  {
+   "task_id": "cal_move_across_days",
+   "family": "tools",
+   "n": 3,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.019159
+  },
+  {
+   "task_id": "cal_spill_to_next_day",
+   "family": "tools",
+   "n": 3,
+   "pass_rate": 1.0,
+   "avg_turns": 5.0,
+   "avg_cost": 0.027056
+  },
+  {
+   "task_id": "retail_address_change_shipped_refuses",
+   "family": "tools",
+   "n": 3,
+   "pass_rate": 1.0,
+   "avg_turns": 3.0,
+   "avg_cost": 0.0086222
+  },
+  {
+   "task_id": "retail_cancel_pending",
+   "family": "tools",
+   "n": 3,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.0106756
+  },
+  {
+   "task_id": "retail_discount_basic_refuses",
+   "family": "tools",
+   "n": 3,
+   "pass_rate": 1.0,
+   "avg_turns": 3.0,
+   "avg_cost": 0.0128642
+  },
+  {
+   "task_id": "retail_refund_all_lines",
+   "family": "tools",
+   "n": 3,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.0177866
+  },
+  {
+   "task_id": "retail_refund_amount_stated",
+   "family": "tools",
+   "n": 3,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.012307600000000002
+  },
+  {
+   "task_id": "air_bag_limit",
+   "family": "tools",
+   "n": 2,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.0201726
+  },
+  {
+   "task_id": "cal_book_free_slot",
+   "family": "tools",
+   "n": 2,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.019044
+  },
+  {
+   "task_id": "cal_reschedule_conflict",
+   "family": "tools",
+   "n": 2,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.020894999999999997
+  },
+  {
+   "task_id": "ops_rollback_right_service",
+   "family": "tools",
+   "n": 2,
+   "pass_rate": 1.0,
+   "avg_turns": 5.0,
+   "avg_cost": 0.0269895
+  },
+  {
+   "task_id": "retail_discount_cap",
+   "family": "tools",
+   "n": 2,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.0158721
+  },
+  {
+   "task_id": "retail_exchange_in_stock",
+   "family": "tools",
+   "n": 2,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.0138951
+  },
+  {
+   "task_id": "retail_partial_qty_refund",
+   "family": "tools",
+   "n": 2,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.013824600000000001
+  },
+  {
+   "task_id": "air_bag_paid_silver",
+   "family": "tools",
+   "n": 1,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.0142176
+  },
+  {
+   "task_id": "air_change_flexible",
+   "family": "tools",
+   "n": 1,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.0161766
+  }
+ ],
+ "task_count": 65,
  "flakiness": [
   {
    "week": "2026-36",
@@ -157,7 +680,7 @@
    "n": 11
   }
  ],
- "generated": "2026-09-07T18:28:31.775986+00:00",
+ "generated": "2026-09-07T19:59:43.502577+00:00",
  "total_cap": 1950,
  "stopped": null
 }

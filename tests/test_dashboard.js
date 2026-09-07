@@ -11,19 +11,22 @@ const ROOT = path.resolve(__dirname, '..');
 const HTML = fs.readFileSync(path.join(ROOT, 'site/index.html'), 'utf8');
 const SCRIPT = HTML.match(/<script>([\s\S]*?)<\/script>\s*<\/body>/)[1];
 const files = process.argv.slice(2).length ? process.argv.slice(2) : [path.join(ROOT, 'site/stats.json')];
+const FAILURES = path.join(ROOT, 'site/failures.json');
 
-function render(stats) {
+function render(stats, failures) {
   const els = {};
   const mk = id => (els[id] = { id, textContent: '', hidden: undefined, style: {}, html: [],
     insertAdjacentHTML(_, s) { this.html.push(s); } });
-  ['stopped', 'headline', 'gauge', 'fam', 'lab', 'flake', 'spend'].forEach(mk);
+  ['stopped', 'headline', 'gauge', 'fam', 'lab', 'flake', 'spend', 'task', 'fails'].forEach(mk);
   const charts = [];
   global.Chart = class { constructor(el, cfg) { charts.push({ el: el.id, cfg }); } };
   global.document = { getElementById: id => els[id] || mk(id), body: {} };
   global.getComputedStyle = () => ({ getPropertyValue: () => '#000' });
-  global.fetch = () => Promise.resolve({ json: () => Promise.resolve(stats) });
+  // URL-aware: the page fetches stats.json and failures.json separately.
+  global.fetch = url => Promise.resolve({
+    json: () => Promise.resolve(String(url).startsWith('failures.json') ? failures : stats) });
   eval(SCRIPT);
-  return new Promise(r => setTimeout(() => r({ els, charts }), 50));
+  return new Promise(r => setTimeout(() => r({ els, charts }), 60));
 }
 
 (async () => {
@@ -32,7 +35,9 @@ function render(stats) {
     const stats = JSON.parse(fs.readFileSync(f, 'utf8'));
     const state = stats.episodes === 0 ? 'empty' : (stats.stopped ? 'stopped' : 'running');
     console.log(`\n${path.basename(f)}  [${state}]  ${stats.episodes} episodes`);
-    const { els, charts } = await render(stats);
+    let failures = [];
+    try { failures = JSON.parse(fs.readFileSync(FAILURES, 'utf8')); } catch (e) { /* first night */ }
+    const { els, charts } = await render(stats, failures);
     const say = (ok, msg) => { console.log((ok ? '  ok   ' : '  FAIL ') + msg); if (!ok) bad++; };
     const text = els.headline.textContent;
 
@@ -55,6 +60,19 @@ function render(stats) {
     const spend = charts.find(c => c.el === 'spend');
     say(spend.cfg.data.labels.length === stats.nightly.length, `${stats.nightly.length} nightly bars`);
     say(!spend.cfg.data.datasets[0].data.some(v => v == null), 'no missing nightly spend values');
+
+    // per-task table and the failure list, the parts that make this a corpus and not a counter
+    say(els.task.html.length === (stats.tasks || []).length, `${els.task.html.length} per-task rows`);
+    say(!/(NaN|undefined)/.test(els.task.html.join('')), 'no NaN/undefined in per-task rows');
+    const html = els.fails.innerHTML || '';
+    if (failures.length) {
+      const shown = (html.match(/<details>/g) || []).length;
+      say(shown === failures.length, `${shown} failures rendered`);
+      say(/turn 0/.test(html), 'turn-by-turn trace present');
+      say(!/<script|onerror=|onload=/i.test(html), 'model-authored trace text is escaped');
+    } else {
+      say(/No failures/.test(html), 'empty failure list handled');
+    }
   }
   console.log(bad ? `\n${bad} problems` : '\ndashboard renders clean in every state');
   process.exit(bad ? 1 : 0);

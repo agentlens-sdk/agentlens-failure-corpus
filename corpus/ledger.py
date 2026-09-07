@@ -16,9 +16,16 @@ CREATE TABLE IF NOT EXISTS nights(
   date TEXT PRIMARY KEY, budget_usd REAL, spent_usd REAL, episodes INT, valid_traces INT, pushed INT);
 """
 
+def _migrate(c):
+    """Columns added after the first nights ran. Idempotent, so an existing ledger just gains them."""
+    cols = {r[1] for r in c.execute("PRAGMA table_info(episodes)")}
+    for name, decl in (("confidence", "REAL"), ("evidence", "TEXT")):
+        if name not in cols:
+            c.execute(f"ALTER TABLE episodes ADD COLUMN {name} {decl}")
+
 def conn():
     DB.parent.mkdir(parents=True, exist_ok=True)
-    c = sqlite3.connect(DB, check_same_thread=False); c.executescript(SCHEMA); return c
+    c = sqlite3.connect(DB, check_same_thread=False); c.executescript(SCHEMA); _migrate(c); return c
 
 def price(model, usage):
     p = CFG["prices"][model]
@@ -37,7 +44,9 @@ def record_call(episode_id, model, usage):
 
 def record_episode(**row):
     with conn() as c:
-        c.execute("INSERT OR REPLACE INTO episodes VALUES(:episode_id,:ts,:family,:task_id,:model,:turns,:outcome,:label,:cost_usd,:trace_path)", row)
+        c.execute("INSERT OR REPLACE INTO episodes"
+                  "(episode_id,ts,family,task_id,model,turns,outcome,label,cost_usd,trace_path)"
+                  " VALUES(:episode_id,:ts,:family,:task_id,:model,:turns,:outcome,:label,:cost_usd,:trace_path)", row)
 
 def spent_total():
     return conn().execute("SELECT COALESCE(SUM(cost_usd),0) FROM calls").fetchone()[0]
@@ -66,6 +75,10 @@ def stats():
         "SELECT COALESCE(label,'unclassified'), COUNT(*) FROM episodes WHERE outcome!='pass' GROUP BY 1 ORDER BY 2 DESC")]
     out["nightly"] = [dict(zip(["date", "budget", "spent", "episodes", "valid", "pushed"], r)) for r in c.execute(
         "SELECT * FROM nights ORDER BY date")]
+    out["tasks"] = [dict(zip(["task_id", "family", "n", "pass_rate", "avg_turns", "avg_cost"], r)) for r in c.execute(
+        "SELECT task_id, family, COUNT(*), AVG(outcome='pass'), AVG(turns), AVG(cost_usd) "
+        "FROM episodes GROUP BY task_id ORDER BY 4 ASC, 3 DESC")]
+    out["task_count"] = len(out["tasks"])
     out["flakiness"] = [dict(zip(["week", "task_id", "pass_rate", "n"], r)) for r in c.execute(
         "SELECT strftime('%Y-%W', ts, 'unixepoch'), task_id, AVG(outcome='pass'), COUNT(*) "
         "FROM episodes WHERE family='flakiness' GROUP BY 1,2 ORDER BY 1")]

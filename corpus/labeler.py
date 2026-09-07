@@ -43,7 +43,7 @@ def label_traces(traces, wait_seconds=7200):
     labels = {}
     for r in client.messages.batches.results(batch.id):
         episode_id = by_cid.get(r.custom_id, r.custom_id)
-        lab = "unclassified"
+        lab, conf, ev = "unclassified", None, None
         if r.result.type == "succeeded":
             msg = r.result.message
             ledger.record_call(episode_id, model, msg.usage.model_dump())
@@ -51,7 +51,11 @@ def label_traces(traces, wait_seconds=7200):
                 txt = msg.content[0].text.strip().strip("`")
                 obj = json.loads(txt[4:] if txt.startswith("json") else txt)
                 jsonschema.validate(obj, SCHEMA); lab = obj["label"]
+                conf, ev = obj.get("confidence"), obj.get("evidence")
             except Exception: pass
         labels[episode_id] = lab
-        with ledger.conn() as c: c.execute("UPDATE episodes SET label=? WHERE episode_id=?", (lab, episode_id))
+        # evidence is the part a reader actually wants: which turn went wrong and why.
+        with ledger.conn() as c:
+            c.execute("UPDATE episodes SET label=?, confidence=?, evidence=? WHERE episode_id=?",
+                      (lab, conf, ev, episode_id))
     return labels
