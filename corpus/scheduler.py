@@ -82,14 +82,18 @@ def main():
         traceback.print_exc()
     try: labeler.label_traces(traces)
     except Exception: traceback.print_exc()
+    # Record the night BEFORE writing stats, or the dashboard's nightly-spend chart is always one
+    # night behind. record_night is INSERT OR REPLACE on date, so the second call just fixes `pushed`.
+    valid = sum(1 for t in traces if t["outcome"] in ("pass", "fail", "runaway"))
+    night = dict(budget_usd=budget, spent_usd=ledger.spent_since(t0), episodes=len(traces),
+                 valid_traces=valid)
+    ledger.record_night(date, pushed=0, **night)
     publisher.write_stats()
     pushed = publisher.git_push(f"nightly {date}: {len(traces)} episodes")
+    ledger.record_night(date, pushed=int(pushed), **night)
     if datetime.date.today().weekday() == 6:
         try: publisher.hf_snapshot()
         except Exception: traceback.print_exc()
-    valid = sum(1 for t in traces if t["outcome"] in ("pass", "fail", "runaway"))
-    ledger.record_night(date, budget_usd=budget, spent_usd=ledger.spent_since(t0), episodes=len(traces),
-                        valid_traces=valid, pushed=int(pushed))
     print(f"done: spent ${ledger.spent_since(t0):.2f}, {valid} valid traces, pushed={pushed}")
 
 if __name__ == "__main__": main()

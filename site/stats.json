@@ -25,7 +25,16 @@
    "n": 1
   }
  ],
- "nightly": [],
+ "nightly": [
+  {
+   "date": "2026-09-07",
+   "budget": 3.0,
+   "spent": 2.36884055,
+   "episodes": 229,
+   "valid": 229,
+   "pushed": 1
+  }
+ ],
  "flakiness": [
   {
    "week": "2026-36",
@@ -148,7 +157,7 @@
    "n": 11
   }
  ],
- "generated": "2026-09-07T18:27:36.565570+00:00",
+ "generated": "2026-09-07T18:28:31.775986+00:00",
  "total_cap": 1950,
  "stopped": null
 }
