@@ -12,7 +12,7 @@ prices:
   claude-haiku-4-5-20251001: {input: 1.00, output: 5.00, cache_read: 0.10, cache_write: 1.25}
 budget:
   total_cap_usd: 1950
-  daily_cap_usd: 10              # was 40; proposed 2026-09-14 for the two-model design, pending the user's call
+  daily_cap_usd: 10              # was 40; set to 10 on 2026-09-14 for the two-model design
   end_date: "2026-11-01"         # set to ~8 weeks from first run
   min_nightly_usd: 2             # below this the scheduler just exits
   nightly_deadline_seconds: 18000  # 5h: a stalled night must not block the next one
