@@ -36,9 +36,15 @@ The original tasks saturated: 61 of 65 never failed in the first 787 episodes. T
 that is not enough: 18 of 20 passed 5/5. The stacked tiers (`family_tools_stack.py`,
 `family_flakiness_stack.py`) combine traps so they interact over a long episode or a stateful
 simulation. Tasks that never fail are listed under `retired` in `config.yaml`: still tested and still
-on the dashboard, no longer queued nightly. Measure new tasks before they get a nightly budget:
+on the dashboard, no longer queued nightly.
 
-    . ~/.corpus.env && .venv/bin/python calibrate.py 5 8   # 5 runs per active task, stop at $8
+Sonnet 5 passes almost everything, so the difficulty comes from a model comparison instead:
+`models.agents` in `config.yaml` lists every agent model, and each night every queued task runs once
+per model, so the data is paired. Retirement means no listed model fails a task. Measure new tasks,
+and new models, before they get a nightly budget:
+
+    . ~/.corpus.env && .venv/bin/python calibrate.py --runs 5 --max-usd 8            # active tasks, agent model
+    . ~/.corpus.env && .venv/bin/python calibrate.py --model claude-haiku-4-5-20251001 --all   # every task, another model
 
 ## Traces
 

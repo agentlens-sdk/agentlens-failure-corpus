@@ -32,21 +32,26 @@ def deadman_check():
 
 def plan(budget):
     """Fill budget by family weight using observed avg cost. Flakiness repeats absorb slack.
-    Tasks listed under a family's `retired` are skipped: saturated tasks buy passes, not failures."""
+    Each pick runs once per model in models.agents, kept adjacent so a budget cutoff splits at most one
+    pair. Tasks listed under a family's `retired` are skipped: no model fails them. Returns (task, model)."""
+    models = CFG["models"].get("agents") or [CFG["models"]["agent"]]
     fams = {k: v for k, v in CFG["families"].items() if v["enabled"]}
-    wsum = sum(v["weight"] for v in fams.values()); queue = []
+    wsum = sum(v["weight"] for v in fams.values()); picks = []
     for name, f in fams.items():
         retired = set(f.get("retired") or [])
         tasks = [t for t in load_family(name) if t.task_id not in retired]
         if not tasks: continue
-        avg, n = ledger.avg_cost(name); unit = avg if n >= 10 else DEFAULT_UNIT.get(name, 0.30)
+        unit = 0.0                                  # cost of one pick = one episode on every model
+        for m in models:
+            avg, n = ledger.avg_cost(name, m, [t.task_id for t in tasks])
+            unit += avg if n >= 10 else DEFAULT_UNIT.get(name, 0.30)
         count = max(1, int(budget * f["weight"] / wsum / max(unit, 0.01)))
         if name == "flakiness":
             reps = max(f.get("repeats", 1), count // len(tasks))
-            queue += [t for t in tasks for _ in range(reps)]
+            picks += [t for t in tasks for _ in range(reps)]
         else:
-            queue += [random.choice(tasks) for _ in range(count)]
-    random.shuffle(queue); return queue
+            picks += [random.choice(tasks) for _ in range(count)]
+    random.shuffle(picks); return [(t, m) for t in picks for m in models]
 
 def main():
     if STOP.exists(): print("STOPPED flag present, exiting"); return
@@ -70,11 +75,11 @@ def main():
     try:
         with ThreadPoolExecutor(CFG["episode"]["concurrency"]) as ex:
             batch = []
-            for task in queue:
+            for task, model in queue:
                 if ledger.spent_since(t0) >= budget: break
                 if time.time() > deadline:
                     print("nightly deadline reached, stopping submission"); break
-                batch.append(ex.submit(run_episode, task))
+                batch.append(ex.submit(run_episode, task, model))
                 if len(batch) >= CFG["episode"]["concurrency"]:
                     collect(batch); batch = []
             collect(batch)

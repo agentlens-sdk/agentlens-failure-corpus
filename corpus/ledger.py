@@ -54,8 +54,14 @@ def spent_total():
 def spent_since(ts):
     return conn().execute("SELECT COALESCE(SUM(cost_usd),0) FROM calls WHERE ts>=?", (ts,)).fetchone()[0]
 
-def avg_cost(family):
-    r = conn().execute("SELECT AVG(cost_usd), COUNT(*) FROM episodes WHERE family=?", (family,)).fetchone()
+def avg_cost(family, model=None, task_ids=None):
+    """Mean episode cost, optionally for one model and a task subset (retired tasks are often far cheaper)."""
+    q, args = "SELECT AVG(cost_usd), COUNT(*) FROM episodes WHERE family=?", [family]
+    if model:
+        q += " AND model=?"; args.append(model)
+    if task_ids:
+        q += f" AND task_id IN ({','.join('?' * len(task_ids))})"; args += list(task_ids)
+    r = conn().execute(q, args).fetchone()
     return (r[0], r[1]) if r and r[1] else (None, 0)
 
 def recent_nights(n):
@@ -79,6 +85,11 @@ def stats():
         "SELECT task_id, family, COUNT(*), AVG(outcome='pass'), AVG(turns), AVG(cost_usd) "
         "FROM episodes GROUP BY task_id ORDER BY 4 ASC, 3 DESC")]
     out["task_count"] = len(out["tasks"])
+    # Per-model views: the keys above blend every agent model together.
+    out["by_model"] = [dict(zip(["model", "family", "n", "pass_rate", "avg_cost"], r)) for r in c.execute(
+        "SELECT model, family, COUNT(*), AVG(outcome='pass'), AVG(cost_usd) FROM episodes GROUP BY 1, 2 ORDER BY 1, 2")]
+    out["tasks_by_model"] = [dict(zip(["task_id", "model", "n", "pass_rate"], r)) for r in c.execute(
+        "SELECT task_id, model, COUNT(*), AVG(outcome='pass') FROM episodes GROUP BY 1, 2 ORDER BY 1, 2")]
     out["flakiness"] = [dict(zip(["week", "task_id", "pass_rate", "n"], r)) for r in c.execute(
         "SELECT strftime('%Y-%W', ts, 'unixepoch'), task_id, AVG(outcome='pass'), COUNT(*) "
         "FROM episodes WHERE family='flakiness' GROUP BY 1,2 ORDER BY 1")]

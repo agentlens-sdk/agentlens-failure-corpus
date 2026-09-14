@@ -1,6 +1,8 @@
 # Edit once. Everything else is driven from the ledger.
 models:
-  agent: claude-sonnet-5
+  agent: claude-sonnet-5         # default for calibrate.py
+  # Nightly, every queued task runs once per model here, so each night's data is paired across models.
+  agents: [claude-sonnet-5, claude-haiku-4-5-20251001]
   agent_fallback: claude-sonnet-4-6
   labeler: claude-haiku-4-5-20251001
 # USD per million tokens. Worst-case Sonnet pricing on purpose: the model can only undershoot.
@@ -10,7 +12,7 @@ prices:
   claude-haiku-4-5-20251001: {input: 1.00, output: 5.00, cache_read: 0.10, cache_write: 1.25}
 budget:
   total_cap_usd: 1950
-  daily_cap_usd: 40
+  daily_cap_usd: 10              # was 40; proposed 2026-09-14 for the two-model design, pending the user's call
   end_date: "2026-11-01"         # set to ~8 weeks from first run
   min_nightly_usd: 2             # below this the scheduler just exits
   nightly_deadline_seconds: 18000  # 5h: a stalled night must not block the next one
@@ -26,44 +28,42 @@ agentlens:
   timeout_seconds: 2             # a dead server costs this much per episode and nothing else
 families:
   swebench:   {weight: 0.40, enabled: false}   # enable after Docker dry run
-  # retired: tasks with zero failures in every run through 2026-09-13. They stay in the code, the tests
-  # and the dashboard; they are just no longer queued nightly. Delete a name to put a task back.
+  # retired: tasks no model in models.agents fails, measured with calibrate.py (Sonnet 5: 5 runs on
+  # 2026-09-13; Haiku 4.5: 3 runs on every task on 2026-09-14). They stay in the code, the tests and the
+  # dashboard; they are just not queued nightly. Delete a name to put a task back.
   tools:
     weight: 0.30
     enabled: true
-    retired: [   # 3-16 runs each: thin evidence for some, but single-step tasks a frontier model clears
+    retired: [
       air_bag_free_gold, air_bag_limit, air_bag_paid_silver, air_cancel_airline_cancelled_free,
-      air_cancel_basic_within_24h, air_change_basic_refuses, air_change_flexible,
-      air_rebook_earliest_after_noon, air_upgrade_basic_refuses, air_upgrade_ok,
-      cal_book_free_slot, cal_move_across_days, cal_reschedule_conflict, cal_spill_to_next_day,
+      air_cancel_basic_within_24h, air_change_basic_refuses, air_upgrade_basic_refuses, air_upgrade_ok,
+      cal_book_free_slot, cal_move_across_days, cal_reschedule_conflict,
       ops_close_open_refuses, ops_close_resolved, ops_no_page_sev3, ops_page_sev1,
-      ops_rollback_right_service, ops_status_internal_refuses, ops_status_public,
+      ops_rollback_bad_deploy, ops_rollback_right_service, ops_status_internal_refuses, ops_status_public,
       retail_address_change_pending, retail_address_change_shipped_refuses, retail_cancel_pending,
       retail_cancel_shipped_refuses, retail_cancel_what_you_can, retail_discount_basic_refuses,
       retail_discount_cap, retail_discount_gold_max, retail_exchange_in_stock,
-      retail_exchange_out_of_stock, retail_exchange_whichever_ships, retail_latest_order_refund,
-      retail_missing_order, retail_most_expensive_ever, retail_nothing_warranted,
-      retail_partial_qty_refund, retail_refund_all_lines, retail_refund_amount_stated,
-      retail_refund_line, retail_refund_pending_is_cancel, retail_threshold_refund,
-      # calibrate.py 2026-09-13, 5/5 on claude-sonnet-5: single traps are caught reliably
-      air_hard_cancel_window_boundary, air_hard_rebook_latest_that_lands, cal_hard_three_way_two_hours,
-      cal_hard_timezone_spill, ops_hard_triage_all_open, ops_rollback_bad_deploy,
+      retail_exchange_out_of_stock, retail_latest_order_refund, retail_missing_order,
+      retail_most_expensive_ever, retail_nothing_warranted, retail_partial_qty_refund,
+      retail_refund_all_lines, retail_refund_amount_stated, retail_refund_line,
+      retail_refund_pending_is_cancel, retail_threshold_refund,
       retail_hard_ceramics_across_orders, retail_hard_discount_across_customers,
       retail_hard_injection_in_tool_output, retail_hard_refund_remaining_units, retail_hard_stock_contention,
+      retail_stack_flaky_backend,
+      # Invalid, not saturated: no tool reveals the other colour SKUs, so a pass means the model guessed them.
+      retail_exchange_whichever_ships,
     ]
   flakiness:
     weight: 0.30
     enabled: true
     repeats: 5                   # throttle raises repeats to hit budget
-    retired: [   # 18-29 runs each
+    retired: [
       balanced_brackets, binary_search, compress_ranges, dedupe_preserve_order, fix_char_counter,
       fix_chunk_tail, fix_mutable_default, fix_sort_by_key, flatten_nested, int_to_roman,
       longest_common_prefix, merge_intervals, refactor_first_even, refactor_grade_table, rle_encode,
       roman_to_int, spiral_order, top_k_words, two_sum,
-      # calibrate.py 2026-09-13, 5/5 on claude-sonnet-5 (hard_interval_subtract's one failure was the token cap)
-      hard_calc_truncating, hard_csv_strict, hard_fix_split_cents, hard_interval_subtract,
-      hard_refactor_merge_names, hard_roman_strict, hard_semver_sort, hard_topo_lexicographic,
-      hard_wrap_text, refactor_string_join,
+      hard_calc_truncating, hard_fix_split_cents, hard_refactor_merge_names, hard_roman_strict,
+      hard_topo_lexicographic, hard_wrap_text, stack_rate_limiter, stack_recurrence,
     ]
 deadman:
   zero_trace_nights: 3
