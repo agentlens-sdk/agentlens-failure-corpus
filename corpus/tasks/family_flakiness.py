@@ -38,6 +38,44 @@ def run_cases(code, fn, cases):
     return r.returncode == 0 and r.stdout.strip().endswith("PASS")
 
 
+_EXPLAIN = r"""
+import json, sys
+p = json.loads(sys.stdin.read())
+def say(msg):
+    print(json.dumps(msg)); sys.exit()
+ns = {}
+try:
+    exec(p["code"], ns)
+    fn = ns[p["fn"]]
+except Exception as e:
+    say(f"code does not load: {type(e).__name__}: {e}")
+for a, e in p["cases"]:
+    try:
+        got = fn(*a)
+    except Exception as ex:
+        say(f"args {a!r}: raised {type(ex).__name__}: {ex}")
+    if got != e:
+        say(f"args {a!r}: expected {e!r}, got {got!r}")
+say("all cases pass")
+"""
+
+
+def explain_failure(code, fn, cases):
+    """The first case a submission gets wrong, as one line for the failure labeler. Same isolation as run_cases."""
+    if not code or not isinstance(code, str):
+        return "no code submitted"
+    payload = json.dumps({"code": code, "fn": fn, "cases": [[list(a), e] for a, e in cases]})
+    try:
+        r = subprocess.run([sys.executable, "-c", _EXPLAIN], input=payload, capture_output=True,
+                           text=True, timeout=TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired:
+        return f"timed out after {TIMEOUT_SECONDS}s"
+    try:
+        return json.loads(r.stdout.strip().splitlines()[-1])[:600]
+    except (IndexError, ValueError, TypeError):
+        return f"harness exited {r.returncode}: {r.stderr.strip()[-300:]}"
+
+
 class Python(Task):
     family = "flakiness"
     system = ("You are a careful Python engineer. Write correct, self-contained Python 3. "
