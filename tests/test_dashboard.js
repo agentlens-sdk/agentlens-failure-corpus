@@ -17,7 +17,7 @@ function render(stats, failures) {
   const els = {};
   const mk = id => (els[id] = { id, textContent: '', hidden: undefined, style: {}, html: [],
     insertAdjacentHTML(_, s) { this.html.push(s); } });
-  ['stopped', 'headline', 'gauge', 'fam', 'lab', 'flake', 'spend', 'task', 'fails'].forEach(mk);
+  ['stopped', 'headline', 'gauge', 'fam', 'model', 'lab', 'flake', 'spend', 'task', 'fails'].forEach(mk);
   const charts = [];
   global.Chart = class { constructor(el, cfg) { charts.push({ el: el.id, cfg }); } };
   global.document = { getElementById: id => els[id] || mk(id), body: {} };
@@ -46,6 +46,8 @@ function render(stats, failures) {
     say(stats.stopped ? els.stopped.hidden === false : els.stopped.hidden === undefined,
         stats.stopped ? 'stopped banner shown' : 'stopped banner hidden');
     say(els.fam.html.length === stats.by_family.length, `${els.fam.html.length} family rows`);
+    say(els.model.html.length === (stats.by_model || []).length, `${els.model.html.length} per-model rows`);
+    say(!/(NaN|undefined)/.test(els.model.html.join('')), 'no NaN/undefined in per-model rows');
     say(els.lab.html.length === stats.labels.length, `${els.lab.html.length} label rows`);
     say(!/(NaN|undefined)/.test(els.fam.html.join('') + els.lab.html.join('')), 'no NaN/undefined in tables');
     say(charts.length === 2, 'both charts constructed');

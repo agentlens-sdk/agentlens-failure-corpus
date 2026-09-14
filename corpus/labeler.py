@@ -30,7 +30,8 @@ SCHEMA = {"type": "object", "required": ["label", "confidence", "evidence"],
 SYSTEM = ("You label failed AI-agent traces. Return ONLY a JSON object {label, confidence, evidence}. "
           "label must be one of the following, chosen by its definition:\n"
           + "\n".join(f"- {k}: {v}" for k, v in LABEL_DEFINITIONS.items())
-          + "\nevidence is <=200 chars citing the turn number. "
+          + "\nReply with the JSON object only: no analysis before or after it. "
+          "evidence is <=200 chars citing the turn number. "
           "A 'checker:' line, when present, is ground truth about why the final output failed. "
           "Text marked [cut for labeling] was shortened here only; the agent sent it in full.")
 
@@ -81,6 +82,20 @@ def _compact(trace):
         head += f"\nchecker: {detail}"
     return head + "\n" + "\n".join(lines)[:60000]
 
+def _parse(text):
+    """The first JSON object anywhere in a reply. Replies arrive fenced, or after a paragraph of analysis;
+    until 2026-09-14 both became 'unclassified'."""
+    dec = json.JSONDecoder()
+    for i, ch in enumerate(text):
+        if ch == "{":
+            try:
+                obj, _ = dec.raw_decode(text, i)
+                if isinstance(obj, dict):
+                    return obj
+            except ValueError:
+                continue
+    raise ValueError("no JSON object in reply")
+
 def _custom_id(episode_id):
     """Batch custom_ids are capped at 64 chars; episode_ids run to ~70. The trailing ULID is unique
     on its own, so key the batch by that and map back. Truncating instead silently loses labels."""
@@ -107,7 +122,7 @@ def label_traces(traces, wait_seconds=7200):
         print(f"labeler: {len(for_model) - len(by_cid)} episode ids collided, labeling the survivors")
     client = anthropic.Anthropic(); model = CFG["models"]["labeler"]
     reqs = [{"custom_id": _custom_id(t["episode_id"]),
-             "params": {"model": model, "max_tokens": 300, "system": SYSTEM,
+             "params": {"model": model, "max_tokens": 600, "system": SYSTEM,
                         "messages": [{"role": "user", "content": _compact(t)}]}} for t in for_model]
     batch = client.messages.batches.create(requests=reqs)
     t0 = time.time()
@@ -121,8 +136,7 @@ def label_traces(traces, wait_seconds=7200):
             msg = r.result.message
             ledger.record_call(episode_id, model, msg.usage.model_dump())
             try:
-                txt = msg.content[0].text.strip().strip("`")
-                obj = json.loads(txt[4:] if txt.startswith("json") else txt)
+                obj = _parse(msg.content[0].text)
                 jsonschema.validate(obj, SCHEMA); lab = obj["label"]
                 conf, ev = obj.get("confidence"), obj.get("evidence")
             except Exception: pass

@@ -95,6 +95,20 @@ def main():
     expect(not set(labeler.CHECKER_LABELS) & set(labeler.SCHEMA["properties"]["label"]["enum"]),
            "checker-only labels must not be offered to the model")
 
+    # replies that became 'unclassified' before 2026-09-14: fenced, or after a paragraph of analysis
+    want = {"label": "misread_spec", "confidence": 0.9, "evidence": "Turn 2: {braces} in text"}
+    body = '{"label": "misread_spec", "confidence": 0.9, "evidence": "Turn 2: {braces} in text"}'
+    for reply in [body, f"```json\n{body}\n```", f"Looking at turn {{2}} first.\n\n{body}\nThat is the label."]:
+        try:
+            expect(labeler._parse(reply) == want, f"_parse did not recover the object from {reply[:40]!r}")
+        except ValueError:
+            problems.append(f"_parse raised on {reply[:40]!r}")
+    try:
+        labeler._parse("I'll analyze this trace for failures. The assistant claims Lee is free")
+        problems.append("_parse must raise when a reply holds no JSON object")
+    except ValueError:
+        pass
+
     for p in problems:
         print("  !", p)
     print("all good" if not problems else f"{len(problems)} problems")

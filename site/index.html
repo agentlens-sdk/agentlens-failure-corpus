@@ -37,11 +37,15 @@ summary::marker{color:var(--mute)}
 
 <h2>Per task family</h2><table id="fam"><tr><th>family</th><th>episodes</th><th>pass rate</th><th>avg cost</th></tr></table>
 
+<h2>Per model</h2>
+<p class="note">Every queued task runs once on each model, so these rows are paired. The table above blends them.</p>
+<table id="model"><tr><th>model</th><th>family</th><th>episodes</th><th>pass rate</th><th>avg cost</th></tr></table>
+
 <h2>How failures split</h2><table id="lab"><tr><th>label</th><th>count</th></tr></table>
 
 <h2>Hardest tasks</h2>
-<p class="note">Every task, worst pass rate first. The checkers are deterministic, so a task that moves has moved for a reason outside this repository.</p>
-<div class="scroll"><table id="task"><tr><th>task</th><th>family</th><th>runs</th><th>pass rate</th><th>turns</th></tr></table></div>
+<p class="note">Every task, worst pass rate first, with each model's pass rate beside it. The checkers are deterministic, so a task that moves has moved for a reason outside this repository.</p>
+<div class="scroll"><table id="task"><tr><th>task</th><th>family</th><th>runs</th><th>pass rate</th><th>by model</th><th>turns</th></tr></table></div>
 
 <h2>Failures, in full</h2>
 <p class="note">The most recent failed episodes, with what was asked, what the agent did, and its label: taken straight from the checker for coding tasks, given by a separate model for tool tasks. This is the corpus; the numbers above are just its shape.</p>
@@ -53,16 +57,20 @@ summary::marker{color:var(--mute)}
 const $=id=>document.getElementById(id), n=x=>x.toLocaleString(), pct=x=>(100*(x||0)).toFixed(0)+'%';
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
 const when=ts=>{try{return new Date(ts*1000).toISOString().slice(0,16).replace('T',' ')}catch(e){return ''}};
+const short=m=>String(m||'').replace(/^claude-/,'').replace(/-\d{8}$/,'');
 
 fetch('stats.json?'+Date.now()).then(r=>r.json()).then(s=>{
   $('headline').textContent=`${n(s.episodes)} traces so far across ${n(s.task_count||0)} tasks. $${s.spent_total.toFixed(0)} of $${s.total_cap} spent. Updated ${s.generated.slice(0,10)}.`;
   $('gauge').style.width=Math.min(100,100*s.spent_total/s.total_cap)+'%';
   if(s.stopped)$('stopped').hidden=false;
   s.by_family.forEach(f=>$('fam').insertAdjacentHTML('beforeend',`<tr><td>${esc(f.family)}</td><td class=n>${n(f.n)}</td><td class=n>${pct(f.pass_rate)}</td><td class=n>$${(f.avg_cost||0).toFixed(3)}</td></tr>`));
+  (s.by_model||[]).forEach(r=>$('model').insertAdjacentHTML('beforeend',`<tr><td class=mono>${esc(short(r.model))}</td><td>${esc(r.family)}</td><td class=n>${n(r.n)}</td><td class=n>${pct(r.pass_rate)}</td><td class=n>$${(r.avg_cost||0).toFixed(3)}</td></tr>`));
   s.labels.forEach(l=>$('lab').insertAdjacentHTML('beforeend',`<tr><td>${esc(l.label)}</td><td class=n>${n(l.n)}</td></tr>`));
+  const byTask={};(s.tasks_by_model||[]).forEach(r=>(byTask[r.task_id]=byTask[r.task_id]||[]).push(r));
   (s.tasks||[]).forEach(t=>$('task').insertAdjacentHTML('beforeend',
     `<tr><td class=mono>${esc(t.task_id)}</td><td>${esc(t.family)}</td><td class=n>${n(t.n)}</td>`+
     `<td class=n><i class=bar style="width:${(40*(t.pass_rate||0)).toFixed(0)}px"></i>${pct(t.pass_rate)}</td>`+
+    `<td class=tn>${(byTask[t.task_id]||[]).map(r=>`${esc(short(r.model))} ${pct(r.pass_rate)}`).join(' · ')}</td>`+
     `<td class=n>${(t.avg_turns||0).toFixed(1)}</td></tr>`));
 
   const weeks=[...new Set(s.flakiness.map(f=>f.week))], tasks=[...new Set(s.flakiness.map(f=>f.task_id))];
@@ -84,7 +92,7 @@ fetch('failures.json?'+Date.now()).then(r=>r.json()).then(fs=>{
     }).join('') || '<p class="empty">Trace file unavailable.</p>';
     return `<details><summary><span class=mono>${esc(f.task_id)}</span>`+
       `<span class=pill>${esc(f.label||'unlabeled')}</span>`+
-      ` <span class=tn>${esc(f.outcome)} &middot; ${f.turns} turns &middot; ${when(f.ts)}</span></summary>`+
+      ` <span class=tn>${f.model?esc(short(f.model))+' &middot; ':''}${esc(f.outcome)} &middot; ${f.turns} turns &middot; ${when(f.ts)}</span></summary>`+
       `<div class=body><div class=ask>${esc(f.prompt)}</div>`+
       (f.evidence?`<p class=tn>Labeled <b>${esc(f.label)}</b>${f.confidence!=null?` (confidence ${esc(f.confidence)})`:''}: ${esc(f.evidence)}</p>`:'')+
       turns+`</div></details>`;

@@ -1,5 +1,5 @@
 {
- "spent_total": 30.34,
+ "spent_total": 30.58,
  "episodes": 1644,
  "by_family": [
   {
@@ -17,31 +17,35 @@
  ],
  "labels": [
   {
+   "label": "wrong_output",
+   "n": 89
+  },
+  {
+   "label": "misread_spec",
+   "n": 32
+  },
+  {
    "label": "premature_stop",
-   "n": 60
-  },
-  {
-   "label": "unclassified",
-   "n": 47
-  },
-  {
-   "label": "tool_misuse",
-   "n": 22
+   "n": 14
   },
   {
    "label": "wrong_target",
-   "n": 17
+   "n": 12
   },
   {
    "label": "environment_error",
    "n": 10
   },
   {
-   "label": "misread_spec",
-   "n": 9
+   "label": "tool_misuse",
+   "n": 5
   },
   {
-   "label": "hallucinated_tool",
+   "label": "other",
+   "n": 3
+  },
+  {
+   "label": "crashed",
    "n": 2
   }
  ],
@@ -60,7 +64,7 @@
    "spent": 10.18636045,
    "episodes": 356,
    "valid": 356,
-   "pushed": 0
+   "pushed": 1
   }
  ],
  "tasks": [
@@ -2324,7 +2328,7 @@
    "n": 16
   }
  ],
- "generated": "2026-09-14T05:16:25.257284+00:00",
+ "generated": "2026-09-14T23:01:15.923255+00:00",
  "total_cap": 1950,
  "stopped": null
 }
