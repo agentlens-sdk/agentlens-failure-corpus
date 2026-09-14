@@ -23,13 +23,22 @@ and (weekly) as a parquet dataset. Budget-capped, dead-man-switched, no human in
 
 | family | tasks | what it probes | enabled |
 |---|---|---|---|
-| `tools` | 40 | policy-following tool use over four mock APIs (retail, airline, ops, calendar) | yes |
-| `flakiness` | 20 | short algorithmic and fix-this prompts, re-run k times a night | yes |
+| `tools` | 46 + 10 hard + 5 stacked | policy-following tool use over four mock APIs (retail, airline, ops, calendar) | yes |
+| `flakiness` | 20 + 10 hard + 4 stacked | short algorithmic, fix-this and small simulation prompts, re-run k times a night | yes |
 | `swebench` | — | repo-scale edits; not implemented, see `corpus/tasks/family_swebench.py` | no |
 
 Every checker is a state or equality assertion. There are no LLM judges anywhere in a checker, so a
 task's pass/fail cannot drift between nights — any movement in the flakiness chart is the model or
 the serving stack, not the benchmark.
+
+The original tasks saturated: 61 of 65 never failed in the first 787 episodes. The hard tiers
+(`family_tools_hard.py`, `family_flakiness_hard.py`) each target one known trap, and calibration showed
+that is not enough: 18 of 20 passed 5/5. The stacked tiers (`family_tools_stack.py`,
+`family_flakiness_stack.py`) combine traps so they interact over a long episode or a stateful
+simulation. Tasks that never fail are listed under `retired` in `config.yaml`: still tested and still
+on the dashboard, no longer queued nightly. Measure new tasks before they get a nightly budget:
+
+    . ~/.corpus.env && .venv/bin/python calibrate.py 5 8   # 5 runs per active task, stop at $8
 
 ## Traces
 
@@ -40,15 +49,20 @@ local file is authoritative and nothing blocks.
 
 ## Tests
 
-Both run offline with no API key and no spend:
+All run offline with no API key and no spend:
 
     python tests/test_tasks.py           # every task's hand-written solution passes its checker
     python tests/test_runner_offline.py  # replays those solutions through the real run_episode()
+    python tests/test_hard_tasks.py      # hard-tier expected values match independent oracles, and
+                                         # each task's intended mistake fails its checker
+    python tests/test_stacked_tasks.py   # the same guarantees for the stacked tiers
     node   tests/test_dashboard.js       # optional: the dashboard renders in every state
 
 ## Running it
 
-Host setup is in `SETUP.md`. Once that is done, `run_nightly.sh` from cron is the whole operation.
+Host setup is in `SETUP.md`. Once that is done, `run_nightly.sh` is the whole operation. On macOS,
+cron and launchd cannot read a repo under `~/Downloads` (privacy protection fails them silently), so
+either keep the repo elsewhere or run `. ~/.corpus.env && ./run_nightly.sh` by hand once a day.
 A `STOPPED` file in the repo root halts everything; the file names the reason. Delete it to resume.
 
 Data license: CC-BY-4.0. Code: MIT.

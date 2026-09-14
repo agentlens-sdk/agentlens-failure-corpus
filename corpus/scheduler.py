@@ -31,11 +31,13 @@ def deadman_check():
         stop("push failed for consecutive nights")
 
 def plan(budget):
-    """Fill budget by family weight using observed avg cost. Flakiness repeats absorb slack."""
+    """Fill budget by family weight using observed avg cost. Flakiness repeats absorb slack.
+    Tasks listed under a family's `retired` are skipped: saturated tasks buy passes, not failures."""
     fams = {k: v for k, v in CFG["families"].items() if v["enabled"]}
     wsum = sum(v["weight"] for v in fams.values()); queue = []
     for name, f in fams.items():
-        tasks = load_family(name)
+        retired = set(f.get("retired") or [])
+        tasks = [t for t in load_family(name) if t.task_id not in retired]
         if not tasks: continue
         avg, n = ledger.avg_cost(name); unit = avg if n >= 10 else DEFAULT_UNIT.get(name, 0.30)
         count = max(1, int(budget * f["weight"] / wsum / max(unit, 0.01)))

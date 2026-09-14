@@ -15,10 +15,10 @@ budget:
   min_nightly_usd: 2             # below this the scheduler just exits
   nightly_deadline_seconds: 18000  # 5h: a stalled night must not block the next one
 episode:
-  max_turns: 30
+  max_turns: 80                  # was 30 until 2026-09-13: the stacked tasks need up to 47 tool calls
   max_total_tokens: 600000
   wall_clock_seconds: 1200
-  max_tokens_per_turn: 4096
+  max_tokens_per_turn: 16000     # was 4096 until 2026-09-13: a coding answer was cut off mid submit call
   concurrency: 2
 agentlens:
   enabled: true                  # emit agentlens/v1 spans into every trace (always on, local)
@@ -26,8 +26,45 @@ agentlens:
   timeout_seconds: 2             # a dead server costs this much per episode and nothing else
 families:
   swebench:   {weight: 0.40, enabled: false}   # enable after Docker dry run
-  tools:      {weight: 0.30, enabled: true}
-  flakiness:  {weight: 0.30, enabled: true, repeats: 5}   # throttle raises repeats to hit budget
+  # retired: tasks with zero failures in every run through 2026-09-13. They stay in the code, the tests
+  # and the dashboard; they are just no longer queued nightly. Delete a name to put a task back.
+  tools:
+    weight: 0.30
+    enabled: true
+    retired: [   # 3-16 runs each: thin evidence for some, but single-step tasks a frontier model clears
+      air_bag_free_gold, air_bag_limit, air_bag_paid_silver, air_cancel_airline_cancelled_free,
+      air_cancel_basic_within_24h, air_change_basic_refuses, air_change_flexible,
+      air_rebook_earliest_after_noon, air_upgrade_basic_refuses, air_upgrade_ok,
+      cal_book_free_slot, cal_move_across_days, cal_reschedule_conflict, cal_spill_to_next_day,
+      ops_close_open_refuses, ops_close_resolved, ops_no_page_sev3, ops_page_sev1,
+      ops_rollback_right_service, ops_status_internal_refuses, ops_status_public,
+      retail_address_change_pending, retail_address_change_shipped_refuses, retail_cancel_pending,
+      retail_cancel_shipped_refuses, retail_cancel_what_you_can, retail_discount_basic_refuses,
+      retail_discount_cap, retail_discount_gold_max, retail_exchange_in_stock,
+      retail_exchange_out_of_stock, retail_exchange_whichever_ships, retail_latest_order_refund,
+      retail_missing_order, retail_most_expensive_ever, retail_nothing_warranted,
+      retail_partial_qty_refund, retail_refund_all_lines, retail_refund_amount_stated,
+      retail_refund_line, retail_refund_pending_is_cancel, retail_threshold_refund,
+      # calibrate.py 2026-09-13, 5/5 on claude-sonnet-5: single traps are caught reliably
+      air_hard_cancel_window_boundary, air_hard_rebook_latest_that_lands, cal_hard_three_way_two_hours,
+      cal_hard_timezone_spill, ops_hard_triage_all_open, ops_rollback_bad_deploy,
+      retail_hard_ceramics_across_orders, retail_hard_discount_across_customers,
+      retail_hard_injection_in_tool_output, retail_hard_refund_remaining_units, retail_hard_stock_contention,
+    ]
+  flakiness:
+    weight: 0.30
+    enabled: true
+    repeats: 5                   # throttle raises repeats to hit budget
+    retired: [   # 18-29 runs each
+      balanced_brackets, binary_search, compress_ranges, dedupe_preserve_order, fix_char_counter,
+      fix_chunk_tail, fix_mutable_default, fix_sort_by_key, flatten_nested, int_to_roman,
+      longest_common_prefix, merge_intervals, refactor_first_even, refactor_grade_table, rle_encode,
+      roman_to_int, spiral_order, top_k_words, two_sum,
+      # calibrate.py 2026-09-13, 5/5 on claude-sonnet-5 (hard_interval_subtract's one failure was the token cap)
+      hard_calc_truncating, hard_csv_strict, hard_fix_split_cents, hard_interval_subtract,
+      hard_refactor_merge_names, hard_roman_strict, hard_semver_sort, hard_topo_lexicographic,
+      hard_wrap_text, refactor_string_join,
+    ]
 deadman:
   zero_trace_nights: 3
   failed_push_nights: 3

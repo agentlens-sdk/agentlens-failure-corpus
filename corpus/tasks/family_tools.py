@@ -986,7 +986,9 @@ class Calendar(Mock):
         return str(day).strip().lower()[:3]
 
     def t_list_events(self, day, calendar="me"):
-        cal = self.db["calendars"].get(calendar)
+        # Case-insensitive since 2026-09-13: every recorded failure of cal_common_free_hour asked for
+        # 'Pat', got "no such calendar", and gave up, which measured casing rather than scheduling.
+        cal = self.db["calendars"].get(str(calendar).strip().lower())
         if cal is None:
             return "error: no such calendar"
         return J(sorted(cal.get(self._day(day), []), key=lambda e: e["hour"]))
