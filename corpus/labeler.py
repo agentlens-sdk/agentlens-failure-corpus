@@ -1,15 +1,36 @@
-"""Failure taxonomy via Haiku on the Batch API. Invalid output -> 'unclassified'. Never retried."""
+"""Failure taxonomy. Coding failures are labeled from the checker; everything else via Haiku on the Batch API.
+
+A failed coding submission's cause is already known exactly: explain_failure reruns it and reports the
+first wrong case, a crash, a timeout or a missing submission. Asking a model to name that only added
+noise (on 2026-09-14 one identical bug drew four different labels), so those labels are assigned
+directly. Tool-use failures need judgment and go to Haiku, with a definition for every label.
+Invalid model output -> 'unclassified'. Never retried.
+"""
 import json, time
 import anthropic, jsonschema
 from . import ledger
 from .ledger import CFG
 
-TAXONOMY = ["loop", "hallucinated_tool", "wrong_target", "premature_stop", "misread_spec",
-            "tool_misuse", "environment_error", "gave_up", "other"]
+LABEL_DEFINITIONS = {
+    "loop": "repeated the same calls or steps without making progress",
+    "hallucinated_tool": "called a tool or argument that does not exist, or relied on data no tool returned",
+    "wrong_target": "acted on the wrong entity: order, line, reservation, flight, service, incident or time slot",
+    "premature_stop": "ended before finishing a required step, including the required final message or note",
+    "misread_spec": "misapplied or misunderstood a rule or requirement stated in the policy or prompt",
+    "tool_misuse": "called a real tool with wrong arguments, or in a way its description rules out",
+    "environment_error": "the task or its tools made success impossible",
+    "gave_up": "stopped and said it could not proceed although the tools allowed it",
+    "other": "none of the above",
+}
+CHECKER_LABELS = ["wrong_output", "crashed", "timed_out"]   # coding tasks only, assigned from the checker
+TAXONOMY = list(LABEL_DEFINITIONS) + CHECKER_LABELS
 SCHEMA = {"type": "object", "required": ["label", "confidence", "evidence"],
-          "properties": {"label": {"enum": TAXONOMY}, "confidence": {"type": "number"}, "evidence": {"type": "string"}}}
+          "properties": {"label": {"enum": list(LABEL_DEFINITIONS)}, "confidence": {"type": "number"},
+                         "evidence": {"type": "string"}}}
 SYSTEM = ("You label failed AI-agent traces. Return ONLY a JSON object {label, confidence, evidence}. "
-          f"label must be one of {TAXONOMY}. evidence is <=200 chars citing the turn number. "
+          "label must be one of the following, chosen by its definition:\n"
+          + "\n".join(f"- {k}: {v}" for k, v in LABEL_DEFINITIONS.items())
+          + "\nevidence is <=200 chars citing the turn number. "
           "A 'checker:' line, when present, is ground truth about why the final output failed. "
           "Text marked [cut for labeling] was shortened here only; the agent sent it in full.")
 
@@ -33,6 +54,20 @@ def _checker_detail(trace):
                  if b.get("type") == "tool_use" and b.get("name") == "submit"), None)
     return explain_failure(code, task.fn, task.cases)
 
+def label_from_checker(detail):
+    """The label a checker detail settles on its own, or None when it does not."""
+    if not detail:
+        return None
+    if detail == "no code submitted":
+        return "premature_stop"
+    if detail.startswith("timed out"):
+        return "timed_out"
+    if detail.startswith(("code does not load", "harness exited")):
+        return "crashed"
+    if detail.startswith("args "):
+        return "crashed" if ": raised " in detail else "wrong_output"
+    return None
+
 def _compact(trace):
     lines = []
     for i, t in enumerate(trace["turns"]):
@@ -51,22 +86,34 @@ def _custom_id(episode_id):
     on its own, so key the batch by that and map back. Truncating instead silently loses labels."""
     return episode_id.rsplit("-", 1)[-1][:64]
 
+def _record(episode_id, label, confidence, evidence):
+    with ledger.conn() as c:
+        c.execute("UPDATE episodes SET label=?, confidence=?, evidence=? WHERE episode_id=?",
+                  (label, confidence, evidence, episode_id))
+
 def label_traces(traces, wait_seconds=7200):
-    failed = [t for t in traces if t["outcome"] != "pass"]
-    if not failed: return {}
-    by_cid = {_custom_id(t["episode_id"]): t["episode_id"] for t in failed}
-    if len(by_cid) != len(failed):
-        print(f"labeler: {len(failed) - len(by_cid)} episode ids collided, labeling the survivors")
+    labels, for_model = {}, []
+    for t in (t for t in traces if t["outcome"] != "pass"):
+        detail = _checker_detail(t) if t["outcome"] == "fail" else None
+        lab = label_from_checker(detail)
+        if lab:
+            labels[t["episode_id"]] = lab
+            _record(t["episode_id"], lab, 1.0, f"checker: {detail}"[:400])
+        else:
+            for_model.append(t)
+    if not for_model: return labels
+    by_cid = {_custom_id(t["episode_id"]): t["episode_id"] for t in for_model}
+    if len(by_cid) != len(for_model):
+        print(f"labeler: {len(for_model) - len(by_cid)} episode ids collided, labeling the survivors")
     client = anthropic.Anthropic(); model = CFG["models"]["labeler"]
     reqs = [{"custom_id": _custom_id(t["episode_id"]),
              "params": {"model": model, "max_tokens": 300, "system": SYSTEM,
-                        "messages": [{"role": "user", "content": _compact(t)}]}} for t in failed]
+                        "messages": [{"role": "user", "content": _compact(t)}]}} for t in for_model]
     batch = client.messages.batches.create(requests=reqs)
     t0 = time.time()
     while client.messages.batches.retrieve(batch.id).processing_status != "ended":
-        if time.time() - t0 > wait_seconds: return {e: "unclassified" for e in by_cid.values()}
+        if time.time() - t0 > wait_seconds: return {**labels, **{e: "unclassified" for e in by_cid.values()}}
         time.sleep(60)
-    labels = {}
     for r in client.messages.batches.results(batch.id):
         episode_id = by_cid.get(r.custom_id, r.custom_id)
         lab, conf, ev = "unclassified", None, None
@@ -81,7 +128,5 @@ def label_traces(traces, wait_seconds=7200):
             except Exception: pass
         labels[episode_id] = lab
         # evidence is the part a reader actually wants: which turn went wrong and why.
-        with ledger.conn() as c:
-            c.execute("UPDATE episodes SET label=?, confidence=?, evidence=? WHERE episode_id=?",
-                      (lab, conf, ev, episode_id))
+        _record(episode_id, lab, conf, ev)
     return labels
