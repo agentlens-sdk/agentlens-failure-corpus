@@ -1,5 +1,5 @@
 {
- "spent_total": 40.68,
+ "spent_total": 44.33,
  "episodes": 2018,
  "by_family": [
   {
@@ -22,35 +22,27 @@
   },
   {
    "label": "misread_spec",
-   "n": 55
+   "n": 78
   },
   {
    "label": "premature_stop",
-   "n": 20
-  },
-  {
-   "label": "wrong_target",
-   "n": 19
+   "n": 23
   },
   {
    "label": "environment_error",
-   "n": 11
+   "n": 10
   },
   {
    "label": "tool_misuse",
-   "n": 8
-  },
-  {
-   "label": "other",
-   "n": 3
+   "n": 6
   },
   {
    "label": "crashed",
    "n": 3
   },
   {
-   "label": "unclassified",
-   "n": 2
+   "label": "wrong_target",
+   "n": 1
   }
  ],
  "nightly": [
@@ -68,7 +60,7 @@
    "spent": 20.28224415,
    "episodes": 730,
    "valid": 730,
-   "pushed": 0
+   "pushed": 1
   }
  ],
  "tasks": [
@@ -2332,7 +2324,7 @@
    "n": 16
   }
  ],
- "generated": "2026-09-15T00:02:59.263249+00:00",
+ "generated": "2026-09-15T00:16:08.426092+00:00",
  "total_cap": 1950,
  "stopped": null
 }
