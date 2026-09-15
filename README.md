@@ -53,6 +53,12 @@ a root `agent` span, an `llm` span per turn, a `tool` span per tool call, ULID i
 If an AgentLens server is running on `localhost:8766` the envelope is POSTed there too; if not, the
 local file is authoritative and nothing blocks.
 
+Every turn records `stop_reason`, the `served_model` the API reported and its `request_id` (from
+2026-09-15), so a pass-rate change can be traced to a serving change. Sampling is the API default for
+every model: `claude-sonnet-5` rejects `temperature`, so none is set. Each episode in the ledger has a
+`run_kind`: `nightly`, `calibration` (from `calibrate.py`) or `aborted` (the 2026-09-13 run stopped by
+hand). Dashboard pass rates and labels count nightly episodes only.
+
 ## Tests
 
 All run offline with no API key and no spend:

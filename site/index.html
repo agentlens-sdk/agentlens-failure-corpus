@@ -35,7 +35,9 @@ summary::marker{color:var(--mute)}
 <div id="stopped" class="stopped" hidden>Run has stopped. Data below is final.</div>
 <p id="headline">Loading…</p><div class="gauge"><i id="gauge"></i></div>
 
-<h2>Per task family</h2><table id="fam"><tr><th>family</th><th>episodes</th><th>pass rate</th><th>avg cost</th></tr></table>
+<h2>Per task family</h2>
+<p class="note">Pass rates and labels below count nightly runs only. Calibration runs, which try every task including retired ones, and a run stopped by hand stay in the corpus but out of these numbers.</p>
+<table id="fam"><tr><th>family</th><th>episodes</th><th>pass rate</th><th>avg cost</th></tr></table>
 
 <h2>Per model</h2>
 <p class="note">Every queued task runs once on each model, so these rows are paired. The table above blends them.</p>

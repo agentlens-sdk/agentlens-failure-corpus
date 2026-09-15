@@ -54,11 +54,12 @@ def write_failures(limit=40):
     Pages serves only site/, so the relevant slice is copied here rather than linked into data/."""
     prompts = _task_prompts()
     rows = ledger.conn().execute(
-        "SELECT episode_id, ts, family, task_id, model, outcome, turns, cost_usd, label, confidence, evidence, trace_path "
-        "FROM episodes WHERE outcome!='pass' ORDER BY ts DESC LIMIT ?", (limit,)).fetchall()
+        "SELECT episode_id, ts, family, task_id, model, COALESCE(run_kind, 'nightly'), outcome, turns, cost_usd, label, "
+        "confidence, evidence, trace_path FROM episodes WHERE outcome!='pass' ORDER BY ts DESC LIMIT ?", (limit,)).fetchall()
     out = []
-    for (eid, ts, fam, task, model, outcome, turns, cost, label, conf, ev, path) in rows:
-        item = {"episode_id": eid, "ts": ts, "family": fam, "task_id": task, "model": model, "outcome": outcome,
+    for (eid, ts, fam, task, model, run_kind, outcome, turns, cost, label, conf, ev, path) in rows:
+        item = {"episode_id": eid, "ts": ts, "family": fam, "task_id": task, "model": model, "run_kind": run_kind,
+                "outcome": outcome,
                 "turns": turns, "cost_usd": cost, "label": label, "confidence": conf,
                 "evidence": ev, "prompt": prompts.get(task, ""), "trace": []}
         try:

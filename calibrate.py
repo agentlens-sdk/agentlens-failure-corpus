@@ -23,6 +23,7 @@ ap.add_argument("--max-usd", type=float, default=8.0)
 ap.add_argument("--model", default=CFG["models"]["agent"])
 ap.add_argument("--all", action="store_true")
 args = ap.parse_args()
+ledger.RUN_KIND = "calibration"   # kept in the corpus, but out of the dashboard's pass rates
 if args.model not in CFG["prices"]:
     raise SystemExit(f"{args.model} has no entry under prices in config.yaml, so its spend cannot be capped")
 

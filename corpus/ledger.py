@@ -4,6 +4,11 @@ from pathlib import Path
 
 CFG = yaml.safe_load(open(Path(__file__).parent.parent / "config.yaml"))
 DB = Path(__file__).parent.parent / "data" / "ledger.sqlite"
+# Stamped on every episode: "nightly" (the scheduler), "calibration" (calibrate.py), or "aborted" (backfilled
+# for the 2026-09-13 run that was stopped by hand). Pass rates in stats() count nightly episodes only:
+# calibration runs every task, including retired ones, and would skew the per-model comparison.
+RUN_KIND = "nightly"
+NIGHTLY = "COALESCE(run_kind, 'nightly') = 'nightly'"
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS calls(
@@ -19,7 +24,7 @@ CREATE TABLE IF NOT EXISTS nights(
 def _migrate(c):
     """Columns added after the first nights ran. Idempotent, so an existing ledger just gains them."""
     cols = {r[1] for r in c.execute("PRAGMA table_info(episodes)")}
-    for name, decl in (("confidence", "REAL"), ("evidence", "TEXT")):
+    for name, decl in (("confidence", "REAL"), ("evidence", "TEXT"), ("run_kind", "TEXT")):
         if name not in cols:
             c.execute(f"ALTER TABLE episodes ADD COLUMN {name} {decl}")
 
@@ -43,10 +48,11 @@ def record_call(episode_id, model, usage):
     return cost
 
 def record_episode(**row):
+    row.setdefault("run_kind", RUN_KIND)
     with conn() as c:
         c.execute("INSERT OR REPLACE INTO episodes"
-                  "(episode_id,ts,family,task_id,model,turns,outcome,label,cost_usd,trace_path)"
-                  " VALUES(:episode_id,:ts,:family,:task_id,:model,:turns,:outcome,:label,:cost_usd,:trace_path)", row)
+                  "(episode_id,ts,family,task_id,model,turns,outcome,label,cost_usd,trace_path,run_kind)"
+                  " VALUES(:episode_id,:ts,:family,:task_id,:model,:turns,:outcome,:label,:cost_usd,:trace_path,:run_kind)", row)
 
 def spent_total():
     return conn().execute("SELECT COALESCE(SUM(cost_usd),0) FROM calls").fetchone()[0]
@@ -78,24 +84,30 @@ def record_night(date, **kw):
                   (date, kw["budget_usd"], kw["spent_usd"], kw["episodes"], kw["valid_traces"], kw["pushed"]))
 
 def stats():
+    """Dashboard numbers. Episode and spend totals cover everything; pass rates and labels count nightly runs only."""
     c = conn()
     out = {"spent_total": round(spent_total(), 2), "episodes": c.execute("SELECT COUNT(*) FROM episodes").fetchone()[0]}
+    out["by_run_kind"] = [dict(zip(["run_kind", "n"], r)) for r in c.execute(
+        "SELECT COALESCE(run_kind, 'nightly'), COUNT(*) FROM episodes GROUP BY 1 ORDER BY 1")]
     out["by_family"] = [dict(zip(["family", "n", "pass_rate", "avg_cost"], r)) for r in c.execute(
-        "SELECT family, COUNT(*), AVG(outcome='pass'), AVG(cost_usd) FROM episodes GROUP BY family")]
+        f"SELECT family, COUNT(*), AVG(outcome='pass'), AVG(cost_usd) FROM episodes WHERE {NIGHTLY} GROUP BY family")]
     out["labels"] = [dict(zip(["label", "n"], r)) for r in c.execute(
-        "SELECT COALESCE(label,'unclassified'), COUNT(*) FROM episodes WHERE outcome!='pass' GROUP BY 1 ORDER BY 2 DESC")]
+        f"SELECT COALESCE(label,'unclassified'), COUNT(*) FROM episodes WHERE outcome!='pass' AND {NIGHTLY} "
+        "GROUP BY 1 ORDER BY 2 DESC")]
     out["nightly"] = [dict(zip(["date", "budget", "spent", "episodes", "valid", "pushed"], r)) for r in c.execute(
         "SELECT * FROM nights ORDER BY date")]
     out["tasks"] = [dict(zip(["task_id", "family", "n", "pass_rate", "avg_turns", "avg_cost"], r)) for r in c.execute(
-        "SELECT task_id, family, COUNT(*), AVG(outcome='pass'), AVG(turns), AVG(cost_usd) "
-        "FROM episodes GROUP BY task_id ORDER BY 4 ASC, 3 DESC")]
+        f"SELECT task_id, family, COUNT(*), AVG(outcome='pass'), AVG(turns), AVG(cost_usd) "
+        f"FROM episodes WHERE {NIGHTLY} GROUP BY task_id ORDER BY 4 ASC, 3 DESC")]
     out["task_count"] = len(out["tasks"])
+    out["flakiness"] = [dict(zip(["week", "task_id", "pass_rate", "n"], r)) for r in c.execute(
+        f"SELECT strftime('%Y-%W', ts, 'unixepoch'), task_id, AVG(outcome='pass'), COUNT(*) "
+        f"FROM episodes WHERE family='flakiness' AND {NIGHTLY} GROUP BY 1,2 ORDER BY 1")]
     # Per-model views: the keys above blend every agent model together.
     out["by_model"] = [dict(zip(["model", "family", "n", "pass_rate", "avg_cost"], r)) for r in c.execute(
-        "SELECT model, family, COUNT(*), AVG(outcome='pass'), AVG(cost_usd) FROM episodes GROUP BY 1, 2 ORDER BY 1, 2")]
+        f"SELECT model, family, COUNT(*), AVG(outcome='pass'), AVG(cost_usd) FROM episodes WHERE {NIGHTLY} "
+        "GROUP BY 1, 2 ORDER BY 1, 2")]
     out["tasks_by_model"] = [dict(zip(["task_id", "model", "n", "pass_rate"], r)) for r in c.execute(
-        "SELECT task_id, model, COUNT(*), AVG(outcome='pass') FROM episodes GROUP BY 1, 2 ORDER BY 1, 2")]
-    out["flakiness"] = [dict(zip(["week", "task_id", "pass_rate", "n"], r)) for r in c.execute(
-        "SELECT strftime('%Y-%W', ts, 'unixepoch'), task_id, AVG(outcome='pass'), COUNT(*) "
-        "FROM episodes WHERE family='flakiness' GROUP BY 1,2 ORDER BY 1")]
+        f"SELECT task_id, model, COUNT(*), AVG(outcome='pass') FROM episodes WHERE {NIGHTLY} "
+        "GROUP BY 1, 2 ORDER BY 1, 2")]
     return out

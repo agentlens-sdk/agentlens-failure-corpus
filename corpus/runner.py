@@ -59,7 +59,11 @@ def run_episode(proto, model=None, client=None):
                 content = [b.model_dump() for b in resp.content]
                 span.record_usage(usage, ledger.price(model, usage))
                 span.set_output(content).annotate(stop_reason=resp.stop_reason)
-            trace["turns"].append({"assistant": content, "usage": usage})
+            # The served model and request id let a pass-rate change be traced to a serving change later.
+            # Sampling is the API default: claude-sonnet-5 rejects temperature, so nothing is set for any model.
+            trace["turns"].append({"assistant": content, "usage": usage, "stop_reason": resp.stop_reason,
+                                   "served_model": getattr(resp, "model", None),
+                                   "request_id": getattr(resp, "_request_id", None)})
             messages.append({"role": "assistant", "content": content})
             if resp.stop_reason != "tool_use":
                 break
