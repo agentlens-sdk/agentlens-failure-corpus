@@ -10,6 +10,7 @@ prices:
   claude-sonnet-5:          {input: 3.00, output: 15.00, cache_read: 0.30, cache_write: 3.75}
   claude-sonnet-4-6:        {input: 3.00, output: 15.00, cache_read: 0.30, cache_write: 3.75}
   claude-haiku-4-5-20251001: {input: 1.00, output: 5.00, cache_read: 0.10, cache_write: 1.25}
+  claude-opus-5:            {input: 5.00, output: 25.00, cache_read: 0.50, cache_write: 6.25}   # reference labeler only; batch discount not applied
 budget:
   total_cap_usd: 1950
   daily_cap_usd: 10              # was 40; set to 10 on 2026-09-14 for the two-model design

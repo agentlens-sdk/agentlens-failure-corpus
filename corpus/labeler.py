@@ -43,10 +43,15 @@ def _cut(s, n):
     return s if len(s) <= n else s[:n] + " [cut for labeling]"
 
 def _checker_detail(trace):
-    """The first case a failed coding submission got wrong, recomputed in a subprocess. None for other families."""
+    """What the checker saw, recomputed from the trace. Coding tasks: the first case the submission got wrong,
+    run in a subprocess. Tool tasks: how the replayed end state differs from the reference solution's."""
+    from .tasks import load_family
+    if trace.get("family") == "tools":
+        from .tasks.explain_tools import explain_tool_failure
+        proto = next((t for t in load_family("tools") if t.task_id == trace["task_id"]), None)
+        return explain_tool_failure(proto, trace) if proto else None
     if trace.get("family") != "flakiness":
         return None
-    from .tasks import load_family
     from .tasks.family_flakiness import explain_failure
     task = next((t for t in load_family("flakiness") if t.task_id == trace["task_id"]), None)
     if task is None:

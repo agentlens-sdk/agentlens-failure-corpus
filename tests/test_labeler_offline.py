@@ -89,7 +89,10 @@ def main():
     expect("rows[0] if rows else" in text, "the labeler must see the end of the submitted code")
     expect("[cut for labeling]" not in text, "a normal submission must not be cut")
     expect(f"checker: {wrong}" in text, "coding traces must carry the checker line")
-    expect("checker:" not in labeler._compact(trace("tools", "cal_no_double_book")), "tool tasks get no checker line")
+    tool_text = labeler._compact(trace("tools", "cal_no_double_book"))
+    expect("checker: end state differs from the reference" in tool_text, "tool traces must carry the replay diff")
+    tool_detail = labeler._checker_detail(trace("tools", "cal_no_double_book"))
+    expect(labeler.label_from_checker(tool_detail) is None, "a tool diff must still go to the model for a label")
     expect(all(f"- {k}: {v}" in labeler.SYSTEM for k, v in labeler.LABEL_DEFINITIONS.items()),
            "every label the model may use must be defined in its prompt")
     expect(not set(labeler.CHECKER_LABELS) & set(labeler.SCHEMA["properties"]["label"]["enum"]),

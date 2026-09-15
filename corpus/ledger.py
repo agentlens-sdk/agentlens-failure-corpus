@@ -67,6 +67,11 @@ def avg_cost(family, model=None, task_ids=None):
 def recent_nights(n):
     return conn().execute("SELECT * FROM nights ORDER BY date DESC LIMIT ?", (n,)).fetchall()
 
+def night(date):
+    """Totals already recorded for a date, so a second run the same day adds to them instead of replacing them."""
+    r = conn().execute("SELECT budget_usd, spent_usd, episodes, valid_traces FROM nights WHERE date=?", (date,)).fetchone()
+    return dict(zip(["budget_usd", "spent_usd", "episodes", "valid_traces"], r or (0, 0, 0, 0)))
+
 def record_night(date, **kw):
     with conn() as c:
         c.execute("INSERT OR REPLACE INTO nights VALUES(?,?,?,?,?,?)",

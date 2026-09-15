@@ -92,8 +92,10 @@ def main():
     # Record the night BEFORE writing stats, or the dashboard's nightly-spend chart is always one
     # night behind. record_night is INSERT OR REPLACE on date, so the second call just fixes `pushed`.
     valid = sum(1 for t in traces if t["outcome"] in ("pass", "fail", "runaway"))
-    night = dict(budget_usd=budget, spent_usd=ledger.spent_since(t0), episodes=len(traces),
-                 valid_traces=valid)
+    # A second run on the same date adds to that date's row; record_night alone would overwrite it.
+    prior = ledger.night(date)
+    night = dict(budget_usd=prior["budget_usd"] + budget, spent_usd=prior["spent_usd"] + ledger.spent_since(t0),
+                 episodes=prior["episodes"] + len(traces), valid_traces=prior["valid_traces"] + valid)
     ledger.record_night(date, pushed=0, **night)
     publisher.write_stats()
     pushed = publisher.git_push(f"nightly {date}: {len(traces)} episodes")
