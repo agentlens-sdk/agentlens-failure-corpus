@@ -112,6 +112,26 @@ def main():
     except ValueError:
         pass
 
+    # replies that became 'unclassified' before the fix, because confidence was not a JSON number
+    for raw, want in [(0.95, 0.95), ("0.95", 0.95), ("high", 0.9), ("Low", 0.3), (7, 1.0), ("sure", None), (None, None)]:
+        got = labeler._confidence(raw)
+        expect(got == want, f"_confidence({raw!r}) = {got!r}, want {want!r}")
+
+    class Block:
+        def __init__(self, type, text=""):
+            self.type, self.text = type, text
+
+    class Reply:
+        def __init__(self, blocks, stop_reason="end_turn"):
+            self.content, self.stop_reason = blocks, stop_reason
+
+    good = '{"label":"misread_spec","confidence":"high","evidence":"Turn 3: skipped the rollback"}'
+    expect(labeler.read_label(Reply([Block("thinking"), Block("text", good)])) == ("misread_spec", 0.9, "Turn 3: skipped the rollback"),
+           "a string confidence after a thinking block must still yield the label")
+    expect(labeler.read_label(Reply([Block("text", '{"label":"wrong_output"}')]))[0] == "unclassified",
+           "checker-only labels from the model must be rejected")
+    expect(labeler.read_label(Reply([Block("text", good)], stop_reason="refusal"))[0] == "unclassified", "a refusal carries no label")
+
     for p in problems:
         print("  !", p)
     print("all good" if not problems else f"{len(problems)} problems")

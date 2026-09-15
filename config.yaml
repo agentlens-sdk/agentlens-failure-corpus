@@ -4,7 +4,9 @@ models:
   # Nightly, every queued task runs once per model here, so each night's data is paired across models.
   agents: [claude-sonnet-5, claude-haiku-4-5-20251001]
   agent_fallback: claude-sonnet-4-6
-  labeler: claude-haiku-4-5-20251001
+  # Tool failures only (coding failures are labeled from the checker). Haiku agreed with Opus on 64% of tool
+  # failures on 2026-09-14, and Opus was right on every disagreement reviewed. About $0.02 a failure, batched.
+  labeler: claude-opus-5
 # USD per million tokens. Worst-case Sonnet pricing on purpose: the model can only undershoot.
 prices:
   claude-sonnet-5:          {input: 3.00, output: 15.00, cache_read: 0.30, cache_write: 3.75}

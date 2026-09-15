@@ -1,10 +1,11 @@
-"""Failure taxonomy. Coding failures are labeled from the checker; everything else via Haiku on the Batch API.
+"""Failure taxonomy. Coding failures are labeled from the checker; tool failures by a model on the Batch API.
 
 A failed coding submission's cause is already known exactly: explain_failure reruns it and reports the
-first wrong case, a crash, a timeout or a missing submission. Asking a model to name that only added
-noise (on 2026-09-14 one identical bug drew four different labels), so those labels are assigned
-directly. Tool-use failures need judgment and go to Haiku, with a definition for every label.
-Invalid model output -> 'unclassified'. Never retried.
+first wrong case, a crash, a timeout or a missing submission, so those labels are assigned directly.
+Tool-use failures need judgment. They carry a replay diff (explain_tools) and go to the labeler model
+in config.yaml, which gets a definition for every label. On 2026-09-14 Haiku agreed with Opus on only
+64% of tool failures, and Opus was right on every disagreement checked, so the labeler is Opus.
+A reply without a usable label -> 'unclassified'. Never retried.
 """
 import json, time
 import anthropic, jsonschema
@@ -14,9 +15,11 @@ from .ledger import CFG
 LABEL_DEFINITIONS = {
     "loop": "repeated the same calls or steps without making progress",
     "hallucinated_tool": "called a tool or argument that does not exist, or relied on data no tool returned",
-    "wrong_target": "acted on the wrong entity: order, line, reservation, flight, service, incident or time slot",
+    "wrong_target": ("acted on a different entity than the one the task named or meant, such as the wrong order, "
+                     "customer, reservation or incident id; not a wrong choice made by misapplying a rule"),
     "premature_stop": "ended before finishing a required step, including the required final message or note",
-    "misread_spec": "misapplied or misunderstood a rule or requirement stated in the policy or prompt",
+    "misread_spec": ("misapplied or misunderstood a rule or requirement stated in the policy or prompt, including "
+                     "choosing the wrong slot, flight, amount or deploy because a rule was applied wrongly"),
     "tool_misuse": "called a real tool with wrong arguments, or in a way its description rules out",
     "environment_error": "the task or its tools made success impossible",
     "gave_up": "stopped and said it could not proceed although the tools allowed it",
@@ -24,14 +27,14 @@ LABEL_DEFINITIONS = {
 }
 CHECKER_LABELS = ["wrong_output", "crashed", "timed_out"]   # coding tasks only, assigned from the checker
 TAXONOMY = list(LABEL_DEFINITIONS) + CHECKER_LABELS
-SCHEMA = {"type": "object", "required": ["label", "confidence", "evidence"],
-          "properties": {"label": {"enum": list(LABEL_DEFINITIONS)}, "confidence": {"type": "number"},
-                         "evidence": {"type": "string"}}}
+# Only the label is validated. Until 2026-09-14 confidence had to be a JSON number, and replies giving
+# "high" or "0.95" were thrown away whole: 29 of 101 reference labels and 2 Haiku labels.
+SCHEMA = {"type": "object", "required": ["label"], "properties": {"label": {"enum": list(LABEL_DEFINITIONS)}}}
 SYSTEM = ("You label failed AI-agent traces. Return ONLY a JSON object {label, confidence, evidence}. "
           "label must be one of the following, chosen by its definition:\n"
           + "\n".join(f"- {k}: {v}" for k, v in LABEL_DEFINITIONS.items())
-          + "\nReply with the JSON object only: no analysis before or after it. "
-          "evidence is <=200 chars citing the turn number. "
+          + "\nconfidence is a number between 0 and 1. evidence is <=200 chars citing the turn number. "
+          "Reply with the JSON object only: no analysis before or after it. "
           "A 'checker:' line, when present, is ground truth about why the final output failed. "
           "Text marked [cut for labeling] was shortened here only; the agent sent it in full.")
 
@@ -61,7 +64,7 @@ def _checker_detail(trace):
     return explain_failure(code, task.fn, task.cases)
 
 def label_from_checker(detail):
-    """The label a checker detail settles on its own, or None when it does not."""
+    """The label a coding checker detail settles on its own, or None when it does not."""
     if not detail:
         return None
     if detail == "no code submitted":
@@ -101,6 +104,28 @@ def _parse(text):
                 continue
     raise ValueError("no JSON object in reply")
 
+def _confidence(x):
+    """A number in [0, 1] from whatever the model wrote there, or None."""
+    words = {"high": 0.9, "medium": 0.6, "low": 0.3}
+    if isinstance(x, str) and x.strip().lower() in words:
+        return words[x.strip().lower()]
+    try:
+        return min(1.0, max(0.0, float(x)))
+    except (TypeError, ValueError):
+        return None
+
+def read_label(message):
+    """(label, confidence, evidence) from a labeler reply; 'unclassified' when it carries no valid label.
+    The text block is looked up by type: with thinking on, it is not the first content block."""
+    if message.stop_reason == "refusal":
+        return "unclassified", None, None
+    try:
+        obj = _parse(next(b.text for b in message.content if b.type == "text"))
+        jsonschema.validate(obj, SCHEMA)
+    except (StopIteration, ValueError, jsonschema.ValidationError):
+        return "unclassified", None, None
+    return obj["label"], _confidence(obj.get("confidence")), (str(obj["evidence"]) if obj.get("evidence") else None)
+
 def _custom_id(episode_id):
     """Batch custom_ids are capped at 64 chars; episode_ids run to ~70. The trailing ULID is unique
     on its own, so key the batch by that and map back. Truncating instead silently loses labels."""
@@ -127,7 +152,7 @@ def label_traces(traces, wait_seconds=7200):
         print(f"labeler: {len(for_model) - len(by_cid)} episode ids collided, labeling the survivors")
     client = anthropic.Anthropic(); model = CFG["models"]["labeler"]
     reqs = [{"custom_id": _custom_id(t["episode_id"]),
-             "params": {"model": model, "max_tokens": 600, "system": SYSTEM,
+             "params": {"model": model, "max_tokens": 16000, "system": SYSTEM,
                         "messages": [{"role": "user", "content": _compact(t)}]}} for t in for_model]
     batch = client.messages.batches.create(requests=reqs)
     t0 = time.time()
@@ -140,11 +165,7 @@ def label_traces(traces, wait_seconds=7200):
         if r.result.type == "succeeded":
             msg = r.result.message
             ledger.record_call(episode_id, model, msg.usage.model_dump())
-            try:
-                obj = _parse(msg.content[0].text)
-                jsonschema.validate(obj, SCHEMA); lab = obj["label"]
-                conf, ev = obj.get("confidence"), obj.get("evidence")
-            except Exception: pass
+            lab, conf, ev = read_label(msg)
         labels[episode_id] = lab
         # evidence is the part a reader actually wants: which turn went wrong and why.
         _record(episode_id, lab, conf, ev)

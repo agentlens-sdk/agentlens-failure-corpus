@@ -48,14 +48,7 @@ for r in client.messages.batches.results(batch.id):
         continue
     msg = r.result.message
     ledger.record_call(e, args.model, msg.usage.model_dump())
-    lab, conf, ev = "unclassified", None, None
-    if msg.stop_reason != "refusal":
-        try:
-            obj = labeler._parse(next(b.text for b in msg.content if b.type == "text"))
-            jsonschema.validate(obj, labeler.SCHEMA)
-            lab, conf, ev = obj["label"], obj.get("confidence"), obj.get("evidence")
-        except Exception:
-            pass
+    lab, conf, ev = labeler.read_label(msg)
     ref[e] = lab
     with ledger.conn() as w:
         w.execute("INSERT OR REPLACE INTO label_audit VALUES(?,?,?,?,?,?)", (e, args.model, lab, conf, ev, time.time()))
