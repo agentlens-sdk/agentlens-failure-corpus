@@ -1,0 +1,25 @@
+# Runs the test suites on every push and PR. They are all offline — scripted fake clients, no API
+# key, no spend — so this is safe to run on the nightly's own pushes too, where it doubles as a check
+# that the night's stats.json still renders: test_dashboard.js runs the real site/index.html script.
+name: tests
+on:
+  push: {branches: [main]}
+  pull_request:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.13"}
+      - uses: actions/setup-node@v4
+        with: {node-version: "22"}
+      - run: pip install -e .
+      - run: python tests/test_tasks.py
+      - run: python tests/test_runner_offline.py
+      - run: python tests/test_hard_tasks.py
+      - run: python tests/test_stacked_tasks.py
+      - run: python tests/test_labeler_offline.py
+      - run: python tests/test_explain_tools.py
+      - run: node tests/test_dashboard.js
