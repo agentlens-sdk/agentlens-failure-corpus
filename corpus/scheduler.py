@@ -1,6 +1,6 @@
 """Nightly entrypoint. Computes tonight's budget, runs episodes, labels, publishes. Fails toward NOT spending."""
 import datetime, time, random, sys, traceback
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
 from pathlib import Path
 from . import ledger, labeler, publisher
 from .ledger import CFG
@@ -65,28 +65,36 @@ def main():
     queue = plan(budget)
     print(f"{date}: budget ${budget:.2f}, {len(queue)} episodes planned")
 
+    # The deadline above is only tested between submissions, so an episode that never returns used to
+    # hold the loop past it indefinitely. Bound the wait: the episode's own caps plus a little slack.
+    ep_cap = CFG["episode"]["wall_clock_seconds"] + CFG["episode"]["request_timeout_seconds"] + 120
+
     def collect(batch):
         """One bad episode must not abandon the rest of the night."""
         for f in batch:
-            try: traces.append(f.result())
+            try: traces.append(f.result(timeout=ep_cap))
             except Terminal: raise
+            except FutureTimeout: print(f"episode still running after {ep_cap}s, abandoning it")
             except Exception: traceback.print_exc()
 
+    ex = ThreadPoolExecutor(CFG["episode"]["concurrency"])
     try:
-        with ThreadPoolExecutor(CFG["episode"]["concurrency"]) as ex:
-            batch = []
-            for task, model in queue:
-                if ledger.spent_since(t0) >= budget: break
-                if time.time() > deadline:
-                    print("nightly deadline reached, stopping submission"); break
-                batch.append(ex.submit(run_episode, task, model))
-                if len(batch) >= CFG["episode"]["concurrency"]:
-                    collect(batch); batch = []
-            collect(batch)
+        batch = []
+        for task, model in queue:
+            if ledger.spent_since(t0) >= budget: break
+            if time.time() > deadline:
+                print("nightly deadline reached, stopping submission"); break
+            batch.append(ex.submit(run_episode, task, model))
+            if len(batch) >= CFG["episode"]["concurrency"]:
+                collect(batch); batch = []
+        collect(batch)
     except Terminal as e:
         stop(f"terminal API error: {e}")
     except Exception:
         traceback.print_exc()
+    finally:
+        # wait=False: a thread wedged in a socket read must not block process exit either.
+        ex.shutdown(wait=False, cancel_futures=True)
     try: labeler.label_traces(traces)
     except Exception: traceback.print_exc()
     # Record the night BEFORE writing stats, or the dashboard's nightly-spend chart is always one

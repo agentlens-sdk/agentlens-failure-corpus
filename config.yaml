@@ -25,6 +25,9 @@ episode:
   wall_clock_seconds: 1200
   max_tokens_per_turn: 16000     # was 4096 until 2026-09-13: a coding answer was cut off mid submit call
   concurrency: 2
+  request_timeout_seconds: 180   # one HTTP call; call_with_backoff retries inside wall_clock_seconds
+labeler:
+  request_timeout_seconds: 120   # batch create/poll/results calls; the 2h batch wait is separate
 agentlens:
   enabled: true                  # emit agentlens/v1 spans into every trace (always on, local)
   endpoint: "http://localhost:8766/api/v1/traces"   # also POST there when a server is up

@@ -82,7 +82,7 @@
    "spent": 4.035967,
    "episodes": 110,
    "valid": 110,
-   "pushed": 0
+   "pushed": 1
   }
  ],
  "tasks": [
@@ -1536,7 +1536,7 @@
    "pass_rate": 1.0
   }
  ],
- "generated": "2026-09-16T17:21:08.905342+00:00",
+ "generated": "2026-09-17T01:08:47.266808+00:00",
  "total_cap": 1950,
  "stopped": null
 }

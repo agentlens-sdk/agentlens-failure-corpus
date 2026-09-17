@@ -17,12 +17,18 @@ TRACES = Path(__file__).parent.parent / "data" / "traces"
 class Runaway(Exception): pass
 class Terminal(Exception): pass  # billing/auth: stop everything
 
-def call_with_backoff(client, **kw):
+def call_with_backoff(client, deadline=None, **kw):
+    """The only retry layer: the client is built with max_retries=0 so this budget is not multiplied by
+    the SDK's own. `deadline` is the episode's wall clock — a stalled socket must not outlive it, which
+    is how 2026-09-15 stretched a 5h night into a 17h one."""
     delay = 1
     for _ in range(5):
+        if deadline and time.time() >= deadline: raise Runaway("wall clock")
         try:
             return client.messages.create(**kw)
         except (anthropic.RateLimitError, anthropic.InternalServerError, anthropic.APIConnectionError):
+            # APITimeoutError subclasses APIConnectionError, so a per-request timeout retries here.
+            if deadline and time.time() + delay >= deadline: raise Runaway("wall clock")
             time.sleep(delay); delay = min(delay * 2, 64)
         except anthropic.AuthenticationError as e:
             raise Terminal(str(e))
@@ -37,7 +43,7 @@ def run_episode(proto, model=None, client=None):
     """proto: Task prototype; .fresh() gives a clean instance with .system .prompt .tools .execute() .check()"""
     task = proto.fresh()
     ep = CFG["episode"]; model = model or CFG["models"]["agent"]
-    client = client or anthropic.Anthropic()
+    client = client or anthropic.Anthropic(timeout=ep["request_timeout_seconds"], max_retries=0)
     episode_id = f"{task.family}-{task.task_id}-{ulid()}"
     al = EpisodeTrace(episode_id, task.family, task.task_id, model, prompt=task.prompt, system=task.system)
     trace = {"episode_id": episode_id, "family": task.family, "task_id": task.task_id, "model": model,
@@ -51,7 +57,8 @@ def run_episode(proto, model=None, client=None):
             if time.time() - t0 > ep["wall_clock_seconds"]: raise Runaway("wall clock")
             if total_tokens > ep["max_total_tokens"]: raise Runaway("token cap")
             with al.llm_span(i) as span:
-                resp = call_with_backoff(client, model=model, system=system, messages=messages,
+                resp = call_with_backoff(client, deadline=t0 + ep["wall_clock_seconds"],
+                                         model=model, system=system, messages=messages,
                                          tools=task.tools, max_tokens=ep["max_tokens_per_turn"])
                 usage = resp.usage.model_dump()
                 cost += ledger.record_call(episode_id, model, usage)

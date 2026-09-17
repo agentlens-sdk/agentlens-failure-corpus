@@ -150,7 +150,9 @@ def label_traces(traces, wait_seconds=7200):
     by_cid = {_custom_id(t["episode_id"]): t["episode_id"] for t in for_model}
     if len(by_cid) != len(for_model):
         print(f"labeler: {len(for_model) - len(by_cid)} episode ids collided, labeling the survivors")
-    client = anthropic.Anthropic(); model = CFG["models"]["labeler"]
+    lb = CFG.get("labeler") or {}
+    client = anthropic.Anthropic(timeout=lb.get("request_timeout_seconds", 120), max_retries=2)
+    model = CFG["models"]["labeler"]
     reqs = [{"custom_id": _custom_id(t["episode_id"]),
              "params": {"model": model, "max_tokens": 16000, "system": SYSTEM,
                         "messages": [{"role": "user", "content": _compact(t)}]}} for t in for_model]
