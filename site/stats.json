@@ -1,5 +1,5 @@
 {
- "spent_total": 66.49,
+ "spent_total": 66.96,
  "episodes": 2732,
  "by_run_kind": [
   {
@@ -36,15 +36,11 @@
   },
   {
    "label": "misread_spec",
-   "n": 94
-  },
-  {
-   "label": "unclassified",
-   "n": 32
+   "n": 111
   },
   {
    "label": "premature_stop",
-   "n": 20
+   "n": 30
   },
   {
    "label": "crashed",
@@ -52,7 +48,11 @@
   },
   {
    "label": "tool_misuse",
-   "n": 8
+   "n": 9
+  },
+  {
+   "label": "unclassified",
+   "n": 4
   },
   {
    "label": "wrong_target",
@@ -102,7 +102,7 @@
    "spent": 10.0198809,
    "episodes": 318,
    "valid": 318,
-   "pushed": 0
+   "pushed": 1
   }
  ],
  "tasks": [
@@ -1556,7 +1556,7 @@
    "pass_rate": 1.0
   }
  ],
- "generated": "2026-09-18T22:12:11.395029+00:00",
+ "generated": "2026-09-18T23:02:10.387460+00:00",
  "total_cap": 1950,
  "stopped": null
 }

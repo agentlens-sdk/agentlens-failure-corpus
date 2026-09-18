@@ -9,9 +9,9 @@
   "outcome": "fail",
   "turns": 8,
   "cost_usd": 0.046310000000000004,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.72,
+  "evidence": "Turn 4/6: INC-23 (email-worker, 'after the last release') only got a ticket; no rollback to e2 despite release-related summary requiring rollback to last good sha.",
   "prompt": "You are on the night shift. Triage every open incident according to the runbook, and note what you did on each one.",
   "trace": [
    {
@@ -268,9 +268,9 @@
   "outcome": "fail",
   "turns": 3,
   "cost_usd": 0.019848,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "premature_stop",
+  "confidence": 0.85,
+  "evidence": "Turn 2: agent gave final chat summary after create_event but never called send_message as policy requires",
   "prompt": "Book a 'design review sync' on Thursday at an hour when both my calendar and Pat's are free, and tell me which hour you picked.",
   "trace": [
    {
@@ -449,9 +449,9 @@
   "outcome": "fail",
   "turns": 2,
   "cost_usd": 0.004633,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "premature_stop",
+  "confidence": 0.75,
+  "evidence": "Turn 0-1: one list_reservations call with malformed flight arg returned [], then agent stopped and asked user for format instead of rebooking/messaging",
   "prompt": "Flight AL900 from Seattle to Boston on 2026-09-20 has been cancelled. Handle every affected reservation according to the policy and tell each passenger what happened.",
   "trace": [
    {
@@ -482,9 +482,9 @@
   "outcome": "fail",
   "turns": 17,
   "cost_usd": 0.13435999999999998,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.83,
+  "evidence": "Turn 11: existing discounts [5.0] treated as $5; applied 6% on top, exceeding the 10% cumulative cap (should have been 5%).",
   "prompt": "Work through the entire support ticket queue according to the policy.",
   "trace": [
    {
@@ -912,9 +912,9 @@
   "outcome": "fail",
   "turns": 3,
   "cost_usd": 0.013919999999999998,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "premature_stop",
+  "confidence": 0.83,
+  "evidence": "Turn 2 ends with a plain assistant reply; send_message was never called as the policy requires.",
   "prompt": "Book a 'coffee with Pat' on Tuesday at 10am and tell me the time you booked.",
   "trace": [
    {
@@ -956,9 +956,9 @@
   "outcome": "fail",
   "turns": 6,
   "cost_usd": 0.021529,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.75,
+  "evidence": "Turn 0-3: converted PT\u2192ET wrongly/mishandled conflict rules; booked roadmap tue16, hiring sync wed12, 1:1 mon12, offsite mon15 vs reference tue11, wed12(2h roadmap), mon13, wed15",
   "prompt": "I'm in Pacific time. Please book these, in this order:\n1. A two-hour 'roadmap' with Pat on Tuesday at 1pm.\n2. A one-hour 'hiring sync' with Lee on Wednesday at 9am.\n3. A one-hour '1:1 with Pat' with Pat on Friday at 2pm.\n4. A two-hour 'offsite planning' with Pat and Lee on Monday at 6am.\nThen send me one message with the day and Eastern start time of each.",
   "trace": [
    {
@@ -1218,9 +1218,9 @@
   "outcome": "fail",
   "turns": 3,
   "cost_usd": 0.004909,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "premature_stop",
+  "confidence": 0.85,
+  "evidence": "Turn 2 ends with a chat summary only; never called send_message as policy requires",
   "prompt": "Book a 'coffee with Pat' on Tuesday at 10am and tell me the time you booked.",
   "trace": [
    {
@@ -1328,9 +1328,9 @@
   "outcome": "fail",
   "turns": 5,
   "cost_usd": 0.009495,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.72,
+  "evidence": "Turn 1-2: agent spilled to Thursday keeping 17:00 instead of the correct 11:00 slot; reference expects thu hour 11.",
   "prompt": "I'm in Pacific time. Book a one-hour 'vendor sync' on Wednesday at 2pm my time, and tell me the day and the Eastern time you booked.",
   "trace": [
    {
@@ -1394,9 +1394,9 @@
   "outcome": "fail",
   "turns": 4,
   "cost_usd": 0.012409200000000002,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "premature_stop",
+  "confidence": 0.85,
+  "evidence": "Turn [3] gave final reply in chat but never called send_message as policy requires",
   "prompt": "I'm in Pacific time. Book a one-hour 'vendor sync' on Wednesday at 2pm my time, and tell me the day and the Eastern time you booked.",
   "trace": [
    {
@@ -1614,9 +1614,9 @@
   "outcome": "fail",
   "turns": 4,
   "cost_usd": 0.01630665,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "premature_stop",
+  "confidence": 0.88,
+  "evidence": "Turn [3]: agent gave chat summary after create_event but never called send_message, the required final message per policy.",
   "prompt": "I'm in Pacific time. Book a one-hour 'vendor sync' on Wednesday at 2pm my time, and tell me the day and the Eastern time you booked.",
   "trace": [
    {
@@ -1669,9 +1669,9 @@
   "outcome": "fail",
   "turns": 4,
   "cost_usd": 0.014162000000000001,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.76,
+  "evidence": "Turn [1]: conflict-resolution/time rules misapplied \u2014 roadmap placed tue 16 (should be wed 12), offsite mon 11 (should be tue 11), 1:1 mon 12 vs 13",
   "prompt": "I'm in Pacific time. Please book these, in this order:\n1. A two-hour 'roadmap' with Pat on Tuesday at 1pm.\n2. A one-hour 'hiring sync' with Lee on Wednesday at 9am.\n3. A one-hour '1:1 with Pat' with Pat on Friday at 2pm.\n4. A two-hour 'offsite planning' with Pat and Lee on Monday at 6am.\nThen send me one message with the day and Eastern start time of each.",
   "trace": [
    {
@@ -2051,9 +2051,9 @@
   "outcome": "fail",
   "turns": 4,
   "cost_usd": 0.009595000000000001,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.92,
+  "evidence": "Turn 1-2: fare is 'economy', not 'basic economy'; agent misapplied change policy and refused instead of moving to AL226 (last flight)",
   "prompt": "Passenger 6620 (reservation R-1002) wants the last SFO to ORD flight on 2026-09-25 instead. Move them and confirm.",
   "trace": [
    {
