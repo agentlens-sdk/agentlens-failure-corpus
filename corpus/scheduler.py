@@ -11,10 +11,29 @@ ROOT = Path(__file__).parent.parent
 STOP = ROOT / "STOPPED"
 DEFAULT_UNIT = {"swebench": 0.70, "tools": 0.30, "flakiness": 0.06}   # USD/episode until 10 observed
 
+# Block-buffered stdout made the 2026-09-16 log unreadable: every line landed at process exit, so it
+# sat out of order against the unbuffered stderr tracebacks, and a 17h night could not be told from a
+# 2h one. Line buffering here covers both entry points — run_nightly.sh and a hand-run
+# `python -m corpus.scheduler` — and it fixes the prints in labeler and publisher too.
+for _s in (sys.stdout, sys.stderr):
+    try: _s.reconfigure(line_buffering=True)
+    except AttributeError: pass                  # not a TextIOWrapper (test capture, some pipe wrappers)
+
+def log(*args):
+    """Timestamped and flushed. A night is read days later, and the ordering of its log is the only
+    evidence of what happened when."""
+    print(datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), *args, flush=True)
+
+def log_exc(what):
+    """A bare traceback carries no time and no context, which is nearly useless inside a 5h log."""
+    log(f"{what}:")
+    traceback.print_exc()
+    sys.stderr.flush()
+
 def stop(reason):
     STOP.write_text(f"{datetime.datetime.now(datetime.timezone.utc).isoformat()} {reason}\n")
     publisher.write_stats(); publisher.git_push(f"STOPPED: {reason}")
-    print("STOPPED:", reason); sys.exit(0)
+    log("STOPPED:", reason); sys.exit(0)
 
 def tonight_budget():
     b = CFG["budget"]; spent = ledger.spent_total()
@@ -54,49 +73,66 @@ def plan(budget):
     random.shuffle(picks); return [(t, m) for t in picks for m in models]
 
 def main():
-    if STOP.exists(): print("STOPPED flag present, exiting"); return
+    if STOP.exists(): log("STOPPED flag present, exiting"); return
     deadman_check()
     budget = tonight_budget()
-    if budget < CFG["budget"]["min_nightly_usd"]: print("budget too small, exiting"); return
+    if budget < CFG["budget"]["min_nightly_usd"]: log("budget too small, exiting"); return
     date = datetime.date.today().isoformat(); t0 = time.time(); traces = []
     # A night that stalls must not eat the following nights: run_nightly.sh holds a lock, so an
     # overrunning run blocks its successors. Spend is capped by budget; this caps wall clock.
     deadline = t0 + CFG["budget"].get("nightly_deadline_seconds", 18000)
     queue = plan(budget)
-    print(f"{date}: budget ${budget:.2f}, {len(queue)} episodes planned")
+    # The deadline is logged as a clock time so a later "deadline reached" line can be checked against it.
+    log(f"{date}: budget ${budget:.2f}, {len(queue)} episodes planned, deadline "
+        f"{datetime.datetime.fromtimestamp(deadline, datetime.timezone.utc).strftime('%H:%M:%SZ')}")
 
     # The deadline above is only tested between submissions, so an episode that never returns used to
     # hold the loop past it indefinitely. Bound the wait: the episode's own caps plus a little slack.
     ep_cap = CFG["episode"]["wall_clock_seconds"] + CFG["episode"]["request_timeout_seconds"] + 120
 
+    last_beat = t0
+
     def collect(batch):
         """One bad episode must not abandon the rest of the night."""
+        nonlocal last_beat
         for f in batch:
             try: traces.append(f.result(timeout=ep_cap))
             except Terminal: raise
-            except FutureTimeout: print(f"episode still running after {ep_cap}s, abandoning it")
-            except Exception: traceback.print_exc()
+            except FutureTimeout: log(f"episode still running after {ep_cap}s, abandoning it")
+            except Exception: log_exc("episode failed")
+        # A heartbeat, so a stalling night is visible while it stalls rather than reconstructed from
+        # the ledger afterwards: 2026-09-16 logged nothing between its first line and its last.
+        if time.time() - last_beat >= 300:
+            last_beat = time.time()
+            log(f"{len(traces)}/{len(queue)} episodes, ${ledger.spent_since(t0):.2f} of ${budget:.2f}, "
+                f"{(deadline - time.time()) / 60:.0f} min to deadline")
 
     ex = ThreadPoolExecutor(CFG["episode"]["concurrency"])
     try:
         batch = []
+        reason = "queue exhausted"
         for task, model in queue:
-            if ledger.spent_since(t0) >= budget: break
-            if time.time() > deadline:
-                print("nightly deadline reached, stopping submission"); break
+            if ledger.spent_since(t0) >= budget: reason = "budget reached"; break
+            if time.time() > deadline: reason = "deadline reached"; break
             batch.append(ex.submit(run_episode, task, model))
             if len(batch) >= CFG["episode"]["concurrency"]:
                 collect(batch); batch = []
         collect(batch)
+        # Which of the three ended submission went unrecorded, so 2026-09-16 could not be explained.
+        log(f"submission stopped: {reason}")
     except Terminal as e:
         stop(f"terminal API error: {e}")
     except Exception:
-        traceback.print_exc()
+        log_exc("submission loop failed")
     finally:
         # wait=False: a thread wedged in a socket read must not block process exit either.
         ex.shutdown(wait=False, cancel_futures=True)
+    # Bracketed on both sides: the labeler polls its batch for up to 2h, which is long enough to look
+    # like a hang, and on 2026-09-16 there was no way to tell that from the log.
+    log(f"labeling {len(traces)} traces")
     try: labeler.label_traces(traces)
-    except Exception: traceback.print_exc()
+    except Exception: log_exc("labeling failed")
+    log("labeling finished")
     # Record the night BEFORE writing stats, or the dashboard's nightly-spend chart is always one
     # night behind. record_night is INSERT OR REPLACE on date, so the second call just fixes `pushed`.
     valid = sum(1 for t in traces if t["outcome"] in ("pass", "fail", "runaway"))
@@ -106,11 +142,14 @@ def main():
                  episodes=prior["episodes"] + len(traces), valid_traces=prior["valid_traces"] + valid)
     ledger.record_night(date, pushed=0, **night)
     publisher.write_stats()
+    log("publishing")
     pushed = publisher.git_push(f"nightly {date}: {len(traces)} episodes")
     ledger.record_night(date, pushed=int(pushed), **night)
     if datetime.date.today().weekday() == 6:
         try: publisher.hf_snapshot()
-        except Exception: traceback.print_exc()
-    print(f"done: spent ${ledger.spent_since(t0):.2f}, {valid} valid traces, pushed={pushed}")
+        except Exception: log_exc("hf snapshot failed")
+    # The elapsed hours are on the done: line because a 17h night and a 2h one otherwise look identical.
+    log(f"done: spent ${ledger.spent_since(t0):.2f}, {valid} valid traces, pushed={pushed}, "
+        f"ran {(time.time() - t0) / 3600:.2f}h")
 
 if __name__ == "__main__": main()
