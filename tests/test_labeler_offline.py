@@ -132,6 +132,50 @@ def main():
            "checker-only labels from the model must be rejected")
     expect(labeler.read_label(Reply([Block("text", good)], stop_reason="refusal"))[0] == "unclassified", "a refusal carries no label")
 
+    # a failed status check while the batch runs is retried, not fatal (2026-09-16 and 2026-09-18)
+    import httpx
+
+    class Result:
+        def __init__(self, custom_id):
+            self.custom_id = custom_id
+            self.result = type("R", (), {"type": "succeeded", "message": Reply([Block("text", good)])})()
+            self.result.message.usage = type("U", (), {"model_dump": lambda self: {"input_tokens": 10, "output_tokens": 5}})()
+
+    class Batches:
+        def __init__(self):
+            self.checks, self.requests = 0, []
+
+        def create(self, requests):
+            self.requests = requests
+            return type("B", (), {"id": "msgbatch_test"})()
+
+        def retrieve(self, batch_id):
+            self.checks += 1
+            if self.checks == 1:
+                raise labeler.anthropic.APIConnectionError(request=httpx.Request("GET", "https://api.anthropic.com"))
+            return type("S", (), {"processing_status": "ended"})()
+
+        def results(self, batch_id):
+            return [Result(r["custom_id"]) for r in self.requests]
+
+    batches = Batches()
+
+    class FlakyApi:
+        def __init__(self, *a, **k):
+            self.messages = type("M", (), {"batches": batches})()
+
+    labeler.anthropic.Anthropic = FlakyApi
+    sleep, labeler.time.sleep = labeler.time.sleep, lambda s: None
+    try:
+        eid = "tools-cal_no_double_book-01M2V4N5MYZ2JZFATAX0QPKC4W"
+        got = labeler.label_traces([trace("tools", "cal_no_double_book", episode_id=eid)])
+        expect(got == {eid: "misread_spec"}, f"a dropped status check must not lose the label: {got!r}")
+        expect(batches.checks == 2, f"the status check should be retried once, was checked {batches.checks} times")
+    except Exception as e:
+        problems.append(f"label_traces raised on a transient status-check failure: {e!r}")
+    finally:
+        labeler.time.sleep = sleep
+
     for p in problems:
         print("  !", p)
     print("all good" if not problems else f"{len(problems)} problems")

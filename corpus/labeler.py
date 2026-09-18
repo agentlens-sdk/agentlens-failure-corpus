@@ -157,11 +157,34 @@ def label_traces(traces, wait_seconds=7200):
              "params": {"model": model, "max_tokens": 16000, "system": SYSTEM,
                         "messages": [{"role": "user", "content": _compact(t)}]}} for t in for_model]
     batch = client.messages.batches.create(requests=reqs)
+    # Logged so that labels from a batch this night stopped waiting for can still be fetched with collect_batch.
+    print(f"labeler: batch {batch.id}, {len(reqs)} requests", flush=True)
+    if not _wait(client, batch.id, wait_seconds):
+        return {**labels, **{e: "unclassified" for e in by_cid.values()}}
+    return {**labels, **collect_batch(client, batch.id, by_cid, model)}
+
+# Worth waiting out. Anything else (a bad key, a batch that does not exist) will not fix itself in a minute.
+TRANSIENT = (anthropic.APIConnectionError, anthropic.InternalServerError, anthropic.RateLimitError)
+
+def _wait(client, batch_id, wait_seconds, poll_seconds=60):
+    """True once the batch has ended, False after wait_seconds. A failed status check is retried at the next
+    poll. On 2026-09-18 a single DNS failure here ended labeling for the night while the batch itself was
+    unaffected, and 2026-09-16 lost its tool-failure labels to the same error."""
     t0 = time.time()
-    while client.messages.batches.retrieve(batch.id).processing_status != "ended":
-        if time.time() - t0 > wait_seconds: return {**labels, **{e: "unclassified" for e in by_cid.values()}}
-        time.sleep(60)
-    for r in client.messages.batches.results(batch.id):
+    while True:
+        try:
+            if client.messages.batches.retrieve(batch_id).processing_status == "ended":
+                return True
+        except TRANSIENT as e:
+            print(f"labeler: status check for {batch_id} failed, retrying: {e}", flush=True)
+        if time.time() - t0 > wait_seconds:
+            return False
+        time.sleep(poll_seconds)
+
+def collect_batch(client, batch_id, by_cid, model):
+    """Record the labels in an ended batch. by_cid maps each request's custom_id back to its episode_id."""
+    labels = {}
+    for r in client.messages.batches.results(batch_id):
         episode_id = by_cid.get(r.custom_id, r.custom_id)
         lab, conf, ev = "unclassified", None, None
         if r.result.type == "succeeded":
