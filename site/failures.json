@@ -73,9 +73,9 @@
   "outcome": "runaway",
   "turns": 9,
   "cost_usd": 0.057697,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.72,
+  "evidence": "Turn 8: agent noted scarce SKU-202 (stock 1) and earliest-placed rule but exchanged O-7102 (placed 2026-09-02) instead of O-7303 (2026-08-25), and applied full 10% on top of existing $5 discount.",
   "prompt": "Work through the entire support ticket queue according to the policy.",
   "trace": [
    {
@@ -319,9 +319,9 @@
   "outcome": "runaway",
   "turns": 5,
   "cost_usd": 0.0743166,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "premature_stop",
+  "confidence": 0.5,
+  "evidence": "Trace ends after refunds at turn [4]; never fetched ticket page 2, never called resolve_ticket or the required send_message final message.",
   "prompt": "Work through the entire support ticket queue according to the policy.",
   "trace": [
    {
@@ -484,9 +484,9 @@
   "outcome": "fail",
   "turns": 4,
   "cost_usd": 0.009712,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.88,
+  "evidence": "Turn 2: treated 'economy' fare as 'basic economy' and refused the change, leaving flight AL220 instead of rebooking to AL224",
   "prompt": "Passenger 6620 (reservation R-1002) has a morning meeting and needs the earliest SFO to ORD flight on 2026-09-25 that departs after 12:00. Move them and tell them the flight number.",
   "trace": [
    {
@@ -577,9 +577,9 @@
   "outcome": "fail",
   "turns": 6,
   "cost_usd": 0.02994,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.88,
+  "evidence": "Turn 3/5: chose AL708 arriving 18:15 while claiming it 'lands by 18:00'; reference rebooks R-3001/R-3005 on AL712 (17:40)",
   "prompt": "Flight AL900 from Seattle to Boston on 2026-09-20 has been cancelled. Handle every affected reservation according to the policy and tell each passenger what happened.",
   "trace": [
    {
@@ -762,9 +762,9 @@
   "outcome": "fail",
   "turns": 6,
   "cost_usd": 0.028539,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.83,
+  "evidence": "Turn 3: skipped rollback for billing-batch (b1) claiming sev3 blocks rollback, and posted status for payments-api/web-frontend which reference says shouldn't occur",
   "prompt": "Triage every open incident according to the runbook, and note what you did on each one.",
   "trace": [
    {
@@ -1152,9 +1152,9 @@
   "outcome": "fail",
   "turns": 15,
   "cost_usd": 0.10951900000000002,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.83,
+  "evidence": "Turn 9: agent computed 6.43% 'remaining' discount on O-7105 instead of policy cap 10% (reference expects discounts list [5.0] unchanged / 5.0)",
   "prompt": "Work through the entire support ticket queue according to the policy.",
   "trace": [
    {
@@ -1488,9 +1488,9 @@
   "outcome": "fail",
   "turns": 3,
   "cost_usd": 0.011748,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.75,
+  "evidence": "Turn [1]: converted PT\u2192ET by adding 3 hours to wrong direction/slots and shifted conflicts backwards (fri 16, mon 12), yielding all four events at wrong hours vs reference",
   "prompt": "I'm in Pacific time. Please book these, in this order:\n1. A two-hour 'roadmap' with Pat on Tuesday at 1pm.\n2. A one-hour 'hiring sync' with Lee on Wednesday at 9am.\n3. A one-hour '1:1 with Pat' with Pat on Friday at 2pm.\n4. A two-hour 'offsite planning' with Pat and Lee on Monday at 6am.\nThen send me one message with the day and Eastern start time of each.",
   "trace": [
    {
@@ -1567,9 +1567,9 @@
   "outcome": "fail",
   "turns": 5,
   "cost_usd": 0.009550999999999999,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.8,
+  "evidence": "Turn 2 booked planning Mon 15:00; reference expects Mon 09:00 (earliest free slot next day), rule misapplied",
   "prompt": "Book a 'planning' on Friday at 3pm and tell me the day and time you booked.",
   "trace": [
    {
@@ -1633,9 +1633,9 @@
   "outcome": "fail",
   "turns": 3,
   "cost_usd": 0.015371,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "premature_stop",
+  "confidence": 0.94,
+  "evidence": "Turn 2: agent created event and summarized in chat but never called send_message, which the policy requires as final step.",
   "prompt": "Book a two-hour 'architecture review' at the earliest start this week (Monday first) when my calendar, Pat's and Lee's are all free for both hours. Tell me the day and start hour.",
   "trace": [
    {
@@ -1846,9 +1846,9 @@
   "outcome": "fail",
   "turns": 7,
   "cost_usd": 0.043924,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.55,
+  "evidence": "Turn 4 paged on-call for INC-24 despite actual severity 3 (ticket-only rule); turn 5-6 claimed billing-batch rolled back to 'e2' though no billing-batch deploys were listed or rolled back",
   "prompt": "You are on the night shift. Triage every open incident according to the runbook, and note what you did on each one.",
   "trace": [
    {
@@ -2142,9 +2142,9 @@
   "outcome": "fail",
   "turns": 6,
   "cost_usd": 0.030624000000000002,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.92,
+  "evidence": "Turn 3: agent called AL708 (arrive 18:15) the 'latest flight that lands by 18:00' and rebooked R-3001/3002/3005 there; reference used AL712/AL706 arriving before 18:00.",
   "prompt": "Flight AL900 from Seattle to Boston on 2026-09-20 has been cancelled. Handle every affected reservation according to the policy and tell each passenger what happened.",
   "trace": [
    {
@@ -2304,9 +2304,9 @@
   "outcome": "fail",
   "turns": 7,
   "cost_usd": 0.032716,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.92,
+  "evidence": "Turn 4: chose AL708 arriving 18:15 as 'latest-departing flight that lands by 18:00', violating the arrive-by-18:00 rule; reference used AL712/AL706.",
   "prompt": "Flight AL900 from Seattle to Boston on 2026-09-20 has been cancelled. Handle every affected reservation according to the policy and tell each passenger what happened.",
   "trace": [
    {
@@ -2637,9 +2637,9 @@
   "outcome": "fail",
   "turns": 4,
   "cost_usd": 0.011264,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "tool_misuse",
+  "confidence": 0.76,
+  "evidence": "Turn 0-1: search_flights called with 'Seattle'/'Boston' instead of reservation codes SEA/BOS, returning [] and leading agent to abandon rebooking (AL712 never found).",
   "prompt": "Passenger 7001's flight on reservation R-2001 was cancelled by the airline. They must land in Boston by 18:00 on 2026-09-20. Put them on the latest-departing flight from Seattle that still lands by then, and tell them the flight number and arrival time.",
   "trace": [
    {
@@ -2768,9 +2768,9 @@
   "outcome": "fail",
   "turns": 5,
   "cost_usd": 0.009774000000000001,
-  "label": null,
-  "confidence": null,
-  "evidence": null,
+  "label": "misread_spec",
+  "confidence": 0.8,
+  "evidence": "Turn 2: after 'offsite prep' 9-11, agent claimed first free hour is 12pm and booked hour 12; reference is hour 11.",
   "prompt": "I'm in Pacific time. Book a one-hour 'vendor sync' on Wednesday at 2pm my time, and tell me the day and the Eastern time you booked.",
   "trace": [
    {

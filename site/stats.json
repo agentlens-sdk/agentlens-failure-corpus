@@ -1,5 +1,5 @@
 {
- "spent_total": 55.91,
+ "spent_total": 56.47,
  "episodes": 2414,
  "by_run_kind": [
   {
@@ -36,23 +36,23 @@
   },
   {
    "label": "misread_spec",
-   "n": 67
-  },
-  {
-   "label": "unclassified",
-   "n": 37
+   "n": 94
   },
   {
    "label": "premature_stop",
-   "n": 16
+   "n": 20
   },
   {
    "label": "tool_misuse",
-   "n": 6
+   "n": 8
   },
   {
    "label": "crashed",
    "n": 5
+  },
+  {
+   "label": "unclassified",
+   "n": 4
   },
   {
    "label": "wrong_target",
@@ -1548,7 +1548,7 @@
    "pass_rate": 1.0
   }
  ],
- "generated": "2026-09-17T17:52:49.099520+00:00",
+ "generated": "2026-09-18T03:21:38.209499+00:00",
  "total_cap": 1950,
  "stopped": null
 }
