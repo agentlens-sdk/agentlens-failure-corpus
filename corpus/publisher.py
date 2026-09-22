@@ -111,11 +111,23 @@ def hf_snapshot():
     rows = [json.loads(p.read_text()) for p in (ROOT / "data" / "traces").rglob("*.json")]
     if not rows:
         return
+    # Labels and run_kind live only in the ledger; a failure corpus without its labels is not much use.
+    meta = {r[0]: r[1:] for r in ledger.conn().execute(
+        "SELECT episode_id, label, confidence, evidence, COALESCE(run_kind, 'nightly') FROM episodes")}
+    for r in rows:
+        r.update(zip(("label", "label_confidence", "label_evidence", "run_kind"),
+                     meta.get(r.get("episode_id"), (None, None, None, None))))
     flat = [{k: (json.dumps(v) if isinstance(v, (list, dict)) else v) for k, v in r.items()} for r in rows]
     # Traces carry optional keys (error, runaway_reason): pad to a single schema or pyarrow refuses.
     keys = sorted({k for r in flat for k in r})
     flat = [{k: r.get(k) for k in keys} for r in flat]
     out = ROOT / "data" / "traces.parquet"
     pq.write_table(pa.Table.from_pylist(flat), out)
-    HfApi().upload_file(path_or_fileobj=str(out), path_in_repo="traces.parquet",
-                        repo_id=repo, repo_type="dataset")
+    api = HfApi()
+    api.create_repo(repo, repo_type="dataset", exist_ok=True)
+    api.upload_file(path_or_fileobj=str(out), path_in_repo="traces.parquet",
+                    repo_id=repo, repo_type="dataset")
+    # The dataset page is this card; without it the Hub shows a bare file listing.
+    card = ROOT / "DATASET_CARD.md"
+    if card.exists():
+        api.upload_file(path_or_fileobj=str(card), path_in_repo="README.md", repo_id=repo, repo_type="dataset")
