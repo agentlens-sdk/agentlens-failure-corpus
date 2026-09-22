@@ -15,7 +15,7 @@ prices:
   claude-opus-5:            {input: 5.00, output: 25.00, cache_read: 0.50, cache_write: 6.25}   # reference labeler only; batch discount not applied
 budget:
   total_cap_usd: 1950
-  daily_cap_usd: 10              # was 40; set to 10 on 2026-09-14 for the two-model design
+  daily_cap_usd: 100             # 100 for the 2026-09-21 burst (two ~$50 runs; the throttle clamps each run); was 10
   end_date: "2026-11-01"         # set to ~8 weeks from first run
   min_nightly_usd: 2             # below this the scheduler just exits
   nightly_deadline_seconds: 18000  # 5h: a stalled night must not block the next one
@@ -24,7 +24,7 @@ episode:
   max_total_tokens: 600000
   wall_clock_seconds: 1200
   max_tokens_per_turn: 16000     # was 4096 until 2026-09-13: a coding answer was cut off mid submit call
-  concurrency: 2
+  concurrency: 8                 # was 2 until 2026-09-21: a $50 run at 2 would take ~13h
   request_timeout_seconds: 180   # one HTTP call; call_with_backoff retries inside wall_clock_seconds
 labeler:
   request_timeout_seconds: 120   # batch create/poll/results calls; the 2h batch wait is separate
