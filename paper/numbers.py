@@ -146,6 +146,31 @@ def main():
             "A cell is one task, one model, one run, with at least two episodes. Mixed = it both passed and failed.", "",
             table(["model", "family", "cells", "mixed"], rows), ""]
 
+    # Selection control: saturated tasks are retired from the queue, so the active set is by construction
+    # the tasks whose pass rates sit away from the extremes -- where repetition produces mixed cells anyway.
+    # The retired tasks, run on the same nights by the same harness, are the control for that.
+    import yaml
+    cfg = yaml.safe_load((ROOT / "config.yaml").read_text())
+    retired = set()
+    for fam in cfg["families"].values():
+        retired |= set(fam.get("retired") or [])
+    # Over every nightly run, not just the paired ones: the retired tasks were mostly queued before the
+    # second model was added, so a paired-only view contains almost none of them.
+    cell_all = collections.defaultdict(lambda: [0, 0])
+    for e in eps:
+        c2 = cell_all[(run_of[e[0]], e[3], e[4])]
+        c2[0] += e[6] == "pass"; c2[1] += 1
+    grp_cells = collections.defaultdict(lambda: [0, 0])
+    for (r, t, m), (k, n) in cell_all.items():
+        if n < 2:
+            continue
+        g = "retired (saturated)" if t in retired else "active"
+        grp_cells[g][0] += 1
+        grp_cells[g][1] += 0 < k < n
+    out += ["## Selection control: mixed cells, retired vs active tasks", "",
+            table(["task group", "cells", "mixed"],
+                  [[g, c, f"{mx} ({100 * mx / c:.1f}%)"] for g, (c, mx) in sorted(grp_cells.items())]), ""]
+
     # Across runs: is a task-model's rate stable from run to run?
     rows, tested = [], 0
     for m in paired:

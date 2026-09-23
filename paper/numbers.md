@@ -63,6 +63,13 @@ A cell is one task, one model, one run, with at least two episodes. Mixed = it b
 | Haiku 4.5 | tools | 91 | 53 (58%) |
 | Haiku 4.5 | flakiness | 49 | 33 (67%) |
 
+## Selection control: mixed cells, retired vs active tasks
+
+| task group | cells | mixed |
+|---|---|---|
+| active | 286 | 137 (47.9%) |
+| retired (saturated) | 57 | 0 (0.0%) |
+
 ## Across-run instability
 
 Task-model pairs seen in 3+ runs with 3+ episodes each whose pass rate differs between runs at p < 0.05 (permutation test, uncorrected; read as candidates, not findings). Pairs tested: 42; expected by chance alone: 2.1.

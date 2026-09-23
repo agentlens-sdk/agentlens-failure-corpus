@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Findings from a 5,647-episode agent failure corpus: the same prompt both passes and fails within a single batch.">
-<title>Same Prompt, Different Outcome</title>
+<meta name="description" content="A nightly agent-failure instrument, its first null result, and what the variance in it actually comes from.">
+<title>AgentLens Failure Corpus</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <style>
@@ -67,10 +67,10 @@ body{margin:0}img{max-width:100%}
     padding-inline: 20px;
     padding-block: 3rem 4rem;
   }
-  h1, h2, h3, .label, .fig, .tick, .ledger, footer a { font-family: var(--mono); }
+  h1, h2, h3, .tick, .ledger, footer a { font-family: var(--mono); }
   h1 {
-    font-size: clamp(1.9rem, 6vw, 2.9rem);
-    line-height: 1.08;
+    font-size: clamp(1.85rem, 5.6vw, 2.8rem);
+    line-height: 1.1;
     letter-spacing: -0.03em;
     font-weight: 700;
     margin: 0 0 1.1rem;
@@ -86,10 +86,17 @@ body{margin:0}img{max-width:100%}
     padding-top: 0.9rem;
     border-top: 1px solid var(--rule-strong);
   }
-  h3 { font-size: 0.96rem; letter-spacing: -0.01em; margin: 0 0 0.5rem; }
+  h3 { font-size: 0.95rem; letter-spacing: -0.01em; margin: 1.6rem 0 0.4rem; }
   p { margin: 0 0 1.1rem; max-width: 65ch; }
   section { margin-top: 3.2rem; }
   strong { font-weight: 600; }
+  ul.plain { list-style: none; padding: 0; margin: 0 0 1.2rem; display: flex; flex-direction: column; gap: 0.7rem; max-width: 65ch; }
+  ul.plain li { padding-left: 1.5rem; position: relative; }
+  ul.plain li::before {
+    content: attr(data-n);
+    position: absolute; left: 0; top: 0.08em;
+    font-family: var(--mono); font-size: 0.7rem; color: var(--ink-3);
+  }
   code {
     font-family: var(--mono);
     font-size: 0.86em;
@@ -105,7 +112,6 @@ body{margin:0}img{max-width:100%}
   .standfirst { font-size: 1.08rem; color: var(--ink-2); max-width: 58ch; }
   .byline { font-family: var(--mono); font-size: 0.76rem; color: var(--ink-3); margin: 0 0 2rem; }
 
-  /* Run ledger: the corpus's own bookkeeping, in its own units */
   .ledger {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(7.2rem, 1fr));
@@ -119,7 +125,6 @@ body{margin:0}img{max-width:100%}
   .ledger dt { color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.64rem; }
   .ledger dd { margin: 0.2rem 0 0; font-size: 1.05rem; font-weight: 500; font-variant-numeric: tabular-nums; }
 
-  /* Charts */
   figure { margin: 0 0 1.6rem; }
   figcaption { font-size: 0.82rem; color: var(--ink-2); margin-top: 0.9rem; max-width: 62ch; }
   .legend { display: flex; flex-wrap: wrap; gap: 1.1rem; font-family: var(--mono); font-size: 0.74rem; margin-bottom: 1.1rem; }
@@ -171,13 +176,12 @@ body{margin:0}img{max-width:100%}
   .pt.h { background: var(--haiku); }
   .gap { font-family: var(--mono); font-size: 0.72rem; text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); }
 
-  /* Mixed-cell bars */
   .bars { display: flex; flex-direction: column; gap: 0.55rem; }
-  .bar-row { display: grid; grid-template-columns: 9.5rem 1fr; align-items: center; gap: 0.7rem; }
+  .bar-row { display: grid; grid-template-columns: 10.5rem 1fr; align-items: center; gap: 0.7rem; }
   .bar-row .name { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-2); }
   .bar-lane { position: relative; height: 22px; display: flex; align-items: center; }
-  .bar-lane .fill { height: 13px; border-radius: 0 3px 3px 0; }
-  .bar-lane .val { font-family: var(--mono); font-size: 0.74rem; margin-left: 0.5rem; font-variant-numeric: tabular-nums; }
+  .bar-lane .fill { height: 13px; border-radius: 0 3px 3px 0; min-width: 1px; }
+  .bar-lane .val { font-family: var(--mono); font-size: 0.74rem; margin-left: 0.5rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
   table { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
   .scroll-x { overflow-x: auto; }
@@ -202,7 +206,7 @@ body{margin:0}img{max-width:100%}
   @media (max-width: 560px) {
     .chart { --gutter: 8.2rem; }
     .row { grid-template-columns: var(--gutter) 1fr 2.6rem; }
-    .bar-row { grid-template-columns: 7.6rem 1fr; }
+    .bar-row { grid-template-columns: 8.4rem 1fr; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
@@ -210,9 +214,9 @@ body{margin:0}img{max-width:100%}
 <body>
 
 <div class="wrap">
-  <h1>The same prompt passes and fails on the same night</h1>
-  <p class="standfirst">A corpus of 5,647 agent episodes, run unattended against fixed tasks with deterministic checkers, two Claude models paired on every task. Every trace and every failure label is public.</p>
-  <p class="byline">ArkFelix7 &middot; 2026-09-22 &middot; data frozen at the 08:07Z run</p>
+  <h1>Eight batches, two models, no drift yet</h1>
+  <p class="standfirst">An unattended instrument that runs the same agent tasks every night with deterministic checkers, publishes every trace, and labels every failure. This is its first read &mdash; including the result that nothing has moved.</p>
+  <p class="byline">ArkFelix7 &middot; 2026-09-23 &middot; data frozen at the 2026-09-22 08:07Z batch</p>
 
   <dl class="ledger">
     <div><dt>Episodes</dt><dd>5,647</dd></div>
@@ -223,8 +227,41 @@ body{margin:0}img{max-width:100%}
   </dl>
 
   <section>
-    <h2>01 / The finding</h2>
-    <p>Run one task on one model several times in the same batch and you get a <em>cell</em>. A cell is <strong>mixed</strong> when the same prompt, unchanged, both passed and failed inside that batch. Sampling uses the API defaults; nothing else varies.</p>
+    <h2>01 / The instrument</h2>
+    <p>Most agent evaluations are a measurement taken once. This one is a fixed instrument pointed at the same tasks night after night, so the question shifts from <em>how good is this model</em> to <em>did anything change since yesterday</em>. Five design decisions make that question answerable:</p>
+
+    <ul class="plain">
+      <li data-n="01"><strong>Deterministic checkers.</strong> Every task ends in a state assertion over a mock backend or an equality check against expected outputs. No LLM judges anywhere in a checker, so a task's verdict cannot drift between nights. Any movement is the model or the serving stack.</li>
+      <li data-n="02"><strong>Paired models.</strong> Every queued task runs once on each agent model, adjacent in the queue, so the two are measured under the same conditions in the same batch.</li>
+      <li data-n="03"><strong>Repetition.</strong> Tasks repeat within a batch, which is what makes within-night variation measurable at all.</li>
+      <li data-n="04"><strong>Serving metadata.</strong> Every turn records <code>stop_reason</code>, the <code>served_model</code> the API reported, and the <code>request_id</code>, so a future change in pass rate can be tied to a serving change rather than guessed at.</li>
+      <li data-n="05"><strong>Unattended and capped.</strong> A spend ledger, a nightly cap, a total cap and a dead-man switch. The harness fails toward not spending.</li>
+    </ul>
+
+    <p>Everything it produces is public: the full trace of every episode, the label on every failure, and the ledger that every figure on this page is computed from.</p>
+  </section>
+
+  <section>
+    <h2>02 / The first read: nothing has drifted</h2>
+    <p>For each task-model pair seen in at least three batches, we test whether its pass rate is the same in every batch (permutation test, uncorrected). Across <strong>42 pairs</strong>, three come out below p&nbsp;=&nbsp;0.05. Chance alone produces about 2.1.</p>
+
+    <p>So the honest headline is a null: over two weeks and 5,647 episodes, per-task pass rates look stable, and outcomes behave like independent draws with a fixed per-task bias. That is worth saying plainly, because the instrument was built to catch the opposite, and it is the baseline any future drift has to beat.</p>
+
+    <div class="note">
+      <p>A null result at this size is not proof of stability. Eight batches over fifteen days is thin, and two of those batches are from a single day. The test has the power to catch a large, sudden shift &mdash; a model swap behind the same name &mdash; and not much more. Detecting a slow drift needs months of nights, which is exactly what the instrument is for.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>03 / Where the variance actually comes from</h2>
+    <p>Run one task on one model several times in the same batch and you get a <em>cell</em>. A cell is <strong>mixed</strong> when the same prompt, unchanged, both passed and failed inside that batch. On the active task set, nearly half of all cells are mixed &mdash; which sounds alarming until you ask which tasks are in that set.</p>
+
+    <figure>
+      <div class="bars" id="control"></div>
+      <figcaption>Mixed cells among tasks retired for being saturated (no model fails them) versus the active set. Same harness, same nights, same models.</figcaption>
+    </figure>
+
+    <p>Tasks are retired from the queue once no model fails them, so the active set is, by construction, the tasks whose pass rates sit away from the extremes &mdash; and a task at a 50% pass rate produces a mixed cell almost every time it repeats. The 0% on the left is the control: when a task is easy for both models, repetition produces the same answer every time. <strong>Most of the mixedness on the right is our task selection, not a property of the models.</strong></p>
 
     <figure>
       <div class="legend" role="note">
@@ -232,15 +269,15 @@ body{margin:0}img{max-width:100%}
         <span><i class="dot h"></i> Claude Haiku 4.5</span>
       </div>
       <div class="bars" id="mixed"></div>
-      <figcaption>Share of cells (one task, one model, one batch, 2+ episodes) that contain both a pass and a failure. 280 cells in total.</figcaption>
+      <figcaption>Mixed cells by model and task family, active set only. 280 cells with 2+ episodes.</figcaption>
     </figure>
 
-    <p>Half of Sonnet 5's repeated coding cells are mixed, and two thirds of Haiku 4.5's. A benchmark that runs each task once would report a coin flip for a large share of these tasks, and call it a capability measurement.</p>
+    <p>What survives that correction is still useful to anyone choosing an eval budget: on tasks at the edge of a model's ability, a single run is close to a coin flip, and the ordering of two models on one such task can invert between runs. The lesson is about how to measure, not about a hidden instability in the models.</p>
   </section>
 
   <section>
-    <h2>02 / Two models, same 22 tasks</h2>
-    <p>Every queued task runs once on each model, adjacent in the queue, so the comparison is paired within a batch. Tasks that no model fails are retired from the queue, so this is the frontier of difficulty for these two models, not a general capability estimate.</p>
+    <h2>04 / Two models, same 22 tasks</h2>
+    <p>The paired design makes the model comparison cheap and fair: same tasks, same batch, same conditions.</p>
 
     <figure>
       <div class="legend" role="note">
@@ -251,15 +288,15 @@ body{margin:0}img{max-width:100%}
         <div class="scale"><div></div><div class="lane" id="scale"></div><div></div></div>
         <div class="rows" id="tasks"></div>
       </div>
-      <figcaption>Pass rate per task, sorted by the gap between the models. Hover or focus a row for the episode counts. Sonnet 5 leads on 19 of 22 tasks (sign test p = 0.00086) &mdash; and trails on three.</figcaption>
+      <figcaption>Pass rate per task, sorted by the gap. Hover or focus a row for episode counts. Sonnet 5 leads on 19 of 22 tasks (sign test p = 0.00086) and trails on three.</figcaption>
     </figure>
 
-    <p>The gaps are not a smooth ranking. Haiku never once passes <code>ops_stack_night_shift</code> or <code>cal_stack_week_planner</code> in 84 attempts, and passes <code>hard_csv_strict</code> 4 times in 266 &mdash; while Sonnet clears each of them at 98% or better. Yet Haiku is the better model on three tasks, including a TTL cache simulation it passes 92% of the time against Sonnet's 75%.</p>
+    <p>The gaps are not a smooth ranking. Haiku never passes <code>ops_stack_night_shift</code> or <code>cal_stack_week_planner</code> in 84 attempts, and passes <code>hard_csv_strict</code> 4 times in 266, while Sonnet clears each at 98% or better. Yet Haiku is the better model on three tasks, including a TTL cache simulation it passes 92% of the time against Sonnet's 75%. These tasks were written to be hard for the stronger model, so this is the frontier of difficulty for these two, not a capability estimate.</p>
   </section>
 
   <section>
-    <h2>03 / How agents actually fail</h2>
-    <p>Coding failures are labeled by rerunning the submission: the first wrong case decides. Tool failures go to Claude Opus 5 with the trace and a replay diff against the reference solution, into a fixed nine-label taxonomy.</p>
+    <h2>05 / How agents fail</h2>
+    <p>Coding failures are labeled by rerunning the submission: the first wrong case decides, with no model involved. Tool failures go to Claude Opus 5 with the trace and a replay diff against the reference solution, into a fixed nine-label taxonomy.</p>
 
     <div class="scroll-x">
       <table>
@@ -278,11 +315,13 @@ body{margin:0}img{max-width:100%}
       </table>
     </div>
 
-    <p>Across 497 labeled tool failures there is <strong>not one hallucinated tool call and not one loop</strong>. These agents fail by misreading the policy they were given. Sonnet's characteristic failure is different from Haiku's: it does the work and then stops before the confirmation message the task required.</p>
+    <p>Across 497 labeled tool failures there is <strong>not one hallucinated tool call and not one loop</strong>. These agents fail by misreading the policy they were given. Sonnet's characteristic failure is its own: it does the work, then stops before the confirmation message the task required.</p>
+
+    <p>One caveat sits on this whole section. The labels come from a single model. When Haiku 4.5 labeled the same 101 failures, it agreed with Opus on 45 of 70 (64%), and the disagreements clustered on one distinction &mdash; acting on the wrong entity versus misapplying a rule that led there. A human-labeled subset is the next validity step, and until it exists these counts describe one labeler's reading.</p>
   </section>
 
   <section>
-    <h2>04 / What a pass costs</h2>
+    <h2>06 / What a pass costs</h2>
     <p>Divide total spend by <em>passing</em> episodes and you get what a caller pays who retries until a checker says yes.</p>
 
     <div class="scroll-x">
@@ -299,16 +338,21 @@ body{margin:0}img{max-width:100%}
       </table>
     </div>
 
-    <p>At less than half the pass rate, Haiku is still the cheaper route to a passing episode &mdash; but only where a checker can tell a pass from a failure and a retry is acceptable. On the five tasks it almost never passes, retries never converge and its expected cost is unbounded.</p>
+    <p>At less than half the pass rate, Haiku is still the cheaper route to a passing episode &mdash; but only where a checker can tell a pass from a failure and retries converge. On the tasks it almost never passes, they never converge and its expected cost is unbounded.</p>
   </section>
 
   <section>
-    <h2>05 / What this does not show</h2>
-    <div class="note">
-      <p><strong>No drift.</strong> Across 42 task-model pairs tested over seven paired batches, three came out below p&nbsp;=&nbsp;0.05 for a change in pass rate between batches. Chance alone produces about 2.1. The instrument for catching serving drift is in place &mdash; every turn records the served model and request id &mdash; but the corpus needs more nights before that question can be answered.</p>
-      <p><strong>No capability claim.</strong> Tasks were written and retired adversarially against these two models. Pass rates here describe the edge of what they can do, not what they can do in general.</p>
-      <p><strong>One day dominates.</strong> Two back-to-back batches on Sep 21&ndash;22 contribute about 73% of the paired episodes, so the pooled rates lean on one day's serving conditions. The per-batch analyses above do not.</p>
-    </div>
+    <h2>07 / What would change these numbers</h2>
+    <p>The instrument is built; the evidence is young. In order of how much each would change what we can claim:</p>
+
+    <ul class="plain">
+      <li data-n="01"><strong>Nights.</strong> Nothing substitutes for elapsed time. Detecting serving drift needs dozens of separated batches, not a big single day.</li>
+      <li data-n="02"><strong>A permanent control tier.</strong> Keep a sample of saturated tasks in the nightly queue so the selection effect in section 03 is measured continuously rather than argued about.</li>
+      <li data-n="03"><strong>A model from another provider.</strong> Two Claude models make this a study of one family. A third breaks that.</li>
+      <li data-n="04"><strong>Human labels.</strong> A hand-labeled subset turns the taxonomy from one model's opinion into a measured instrument.</li>
+    </ul>
+
+    <p>All of it lands in the same public corpus as it arrives. The dataset and the dashboard update as the nights accumulate.</p>
   </section>
 
   <footer>
@@ -324,11 +368,16 @@ body{margin:0}img{max-width:100%}
 <script>
   var TASKS = [{"t":"retail_address_plus_capped_discount","f":"tools","s":75,"h":96,"sn":48,"hn":48},{"t":"hard_ttl_lru_cache","f":"coding","s":75,"h":92,"sn":263,"hn":263},{"t":"cal_no_double_book","f":"tools","s":80,"h":91,"sn":54,"hn":54},{"t":"air_hard_cancel_window_boundary","f":"tools","s":100,"h":95,"sn":41,"hn":41},{"t":"hard_semver_sort","f":"coding","s":100,"h":90,"sn":263,"hn":261},{"t":"cal_common_free_hour","f":"tools","s":97,"h":83,"sn":58,"hn":58},{"t":"stack_resolve_path","f":"coding","s":86,"h":66,"sn":263,"hn":264},{"t":"cal_hard_timezone_spill","f":"tools","s":55,"h":28,"sn":58,"hn":58},{"t":"hard_interval_subtract","f":"coding","s":98,"h":70,"sn":262,"hn":262},{"t":"stack_order_book","f":"coding","s":97,"h":67,"sn":257,"hn":257},{"t":"air_change_flexible","f":"tools","s":100,"h":68,"sn":53,"hn":53},{"t":"cal_spill_to_next_day","f":"tools","s":97,"h":61,"sn":62,"hn":62},{"t":"air_hard_rebook_latest_that_lands","f":"tools","s":100,"h":45,"sn":42,"hn":42},{"t":"cal_hard_three_way_two_hours","f":"tools","s":97,"h":41,"sn":61,"hn":61},{"t":"air_stack_disruption","f":"tools","s":88,"h":22,"sn":66,"hn":65},{"t":"refactor_string_join","f":"coding","s":67,"h":0,"sn":261,"hn":261},{"t":"retail_stack_ticket_queue","f":"tools","s":97,"h":24,"sn":58,"hn":58},{"t":"ops_hard_triage_all_open","f":"tools","s":100,"h":27,"sn":48,"hn":48},{"t":"hard_csv_strict","f":"coding","s":99,"h":2,"sn":266,"hn":266},{"t":"air_rebook_earliest_after_noon","f":"tools","s":100,"h":2,"sn":57,"hn":57},{"t":"cal_stack_week_planner","f":"tools","s":98,"h":0,"sn":41,"hn":41},{"t":"ops_stack_night_shift","f":"tools","s":100,"h":0,"sn":43,"hn":43}];
 
+  var CONTROL = [
+    {name: "Retired (saturated)", pct: 0, mixed: 0, cells: 57, tone: "var(--ink-3)"},
+    {name: "Active set", pct: 47.9, mixed: 137, cells: 286, tone: "var(--flag)"}
+  ];
+
   var MIXED = [
-    {model: "Sonnet 5", family: "tools", pct: 24, cells: 91, series: "s"},
-    {model: "Sonnet 5", family: "coding", pct: 51, cells: 49, series: "s"},
-    {model: "Haiku 4.5", family: "tools", pct: 58, cells: 91, series: "h"},
-    {model: "Haiku 4.5", family: "coding", pct: 67, cells: 49, series: "h"}
+    {model: "Sonnet 5", family: "tools", pct: 24, cells: 91, series: "sonnet"},
+    {model: "Sonnet 5", family: "coding", pct: 51, cells: 49, series: "sonnet"},
+    {model: "Haiku 4.5", family: "tools", pct: 58, cells: 91, series: "haiku"},
+    {model: "Haiku 4.5", family: "coding", pct: 67, cells: 49, series: "haiku"}
   ];
 
   (function scale() {
@@ -363,6 +412,22 @@ body{margin:0}img{max-width:100%}
     });
   })();
 
+  (function control() {
+    var host = document.getElementById("control");
+    CONTROL.forEach(function (d) {
+      var row = document.createElement("div");
+      row.className = "bar-row";
+      row.title = d.mixed + " of " + d.cells + " cells mixed";
+      row.innerHTML =
+        '<div class="name">' + d.name + '</div>' +
+        '<div class="bar-lane">' +
+          '<div class="fill" style="width:' + d.pct + '%;background:' + d.tone + '"></div>' +
+          '<div class="val">' + d.pct + '% <span style="color:var(--ink-3)">' + d.mixed + '/' + d.cells + '</span></div>' +
+        '</div>';
+      host.appendChild(row);
+    });
+  })();
+
   (function mixed() {
     var host = document.getElementById("mixed");
     MIXED.forEach(function (d) {
@@ -373,7 +438,7 @@ body{margin:0}img{max-width:100%}
       row.innerHTML =
         '<div class="name">' + d.model + ' <span style="color:var(--ink-3)">' + d.family + '</span></div>' +
         '<div class="bar-lane">' +
-          '<div class="fill" style="width:' + d.pct + '%;background:var(--' + (d.series === "s" ? "sonnet" : "haiku") + ')"></div>' +
+          '<div class="fill" style="width:' + d.pct + '%;background:var(--' + d.series + ')"></div>' +
           '<div class="val">' + d.pct + '%</div>' +
         '</div>';
       host.appendChild(row);

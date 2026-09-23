@@ -141,6 +141,15 @@ both a pass and a failure.
 Even for the stronger model, half of the repeated coding cells both pass and fail within a single night. A
 single-shot evaluation of these tasks would report pass or fail at random for a large share of them.
 
+**How much of this is task selection?** Most of it. Retirement (Section 2.2) removes tasks no model fails, so
+the active set is by construction the set whose pass rates sit away from the extremes -- and a task near 50%
+produces a mixed cell almost whenever it repeats. The retired tasks, run by the same harness on the same
+nights, are the control: **0 of 57 retired cells are mixed, against 137 of 286 active ones (47.9%)**. The
+within-night variation is therefore consistent with independent draws at each task's own pass rate, not
+evidence of an extra instability in the models. What remains practically useful is narrower: on tasks at the
+edge of a model's ability, one run is close to a coin flip, and the ordering of two models on such a task can
+invert between runs.
+
 ### 4.3 Across nights
 
 For each task-model pair seen in three or more runs with at least three episodes per run, we test whether its
@@ -177,7 +186,10 @@ each trace). Crashes are rare, and 34 of the 35 are Haiku's.
 
 - **Adversarial task selection.** Tasks were written and retired against these two models, so pass rates are
   conditional on a set chosen to make at least one of them fail. The size of the model gap is partly a
-  consequence of that selection, and does not measure general capability.
+  consequence of that selection, and does not measure general capability. Section 4.2 quantifies the same
+  effect for the mixed-cell rate against the retired-task control; the control is historical, since retired
+  tasks stopped being queued on 2026-09-13, and a permanent control tier in the nightly queue would measure
+  it continuously instead.
 - **Short time span.** The corpus covers 2026-09-07 onward with a handful of paired runs. Within-run
   nondeterminism is well supported. Across-run stability is not yet testable at useful power.
 - **Uneven time sampling.** On 2026-09-21/22 we ran two back-to-back runs of about $50 each to grow the sample.
