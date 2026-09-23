@@ -2,7 +2,7 @@
 import datetime, time, random, sys, traceback
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
 from pathlib import Path
-from . import ledger, labeler, publisher
+from . import ledger, labeler, publisher, runstate
 from .ledger import CFG
 from .runner import run_episode, Terminal
 from .tasks import load_family
@@ -33,6 +33,7 @@ def log_exc(what):
 def stop(reason):
     STOP.write_text(f"{datetime.datetime.now(datetime.timezone.utc).isoformat()} {reason}\n")
     publisher.write_stats(); publisher.git_push(f"STOPPED: {reason}")
+    runstate.run_end(stopped=reason)
     log("STOPPED:", reason); sys.exit(0)
 
 def tonight_budget():
@@ -85,6 +86,8 @@ def main():
     # The deadline is logged as a clock time so a later "deadline reached" line can be checked against it.
     log(f"{date}: budget ${budget:.2f}, {len(queue)} episodes planned, deadline "
         f"{datetime.datetime.fromtimestamp(deadline, datetime.timezone.utc).strftime('%H:%M:%SZ')}")
+    # Same three facts, published for the live watcher (site/live.html). Best-effort throughout.
+    runstate.run_start(date, budget, [(t.family, t.task_id, m) for t, m in queue], deadline)
 
     # The deadline above is only tested between submissions, so an episode that never returns used to
     # hold the loop past it indefinitely. Bound the wait: the episode's own caps plus a little slack.
@@ -100,6 +103,7 @@ def main():
             except Terminal: raise
             except FutureTimeout: log(f"episode still running after {ep_cap}s, abandoning it")
             except Exception: log_exc("episode failed")
+        runstate.heartbeat(spent_usd=ledger.spent_since(t0))
         # A heartbeat, so a stalling night is visible while it stalls rather than reconstructed from
         # the ledger afterwards: 2026-09-16 logged nothing between its first line and its last.
         if time.time() - last_beat >= 300:
@@ -120,6 +124,7 @@ def main():
         collect(batch)
         # Which of the three ended submission went unrecorded, so 2026-09-16 could not be explained.
         log(f"submission stopped: {reason}")
+        runstate.heartbeat(spent_usd=ledger.spent_since(t0), note=f"submission stopped: {reason}")
     except Terminal as e:
         stop(f"terminal API error: {e}")
     except Exception:
@@ -130,9 +135,11 @@ def main():
     # Bracketed on both sides: the labeler polls its batch for up to 2h, which is long enough to look
     # like a hang, and on 2026-09-16 there was no way to tell that from the log.
     log(f"labeling {len(traces)} traces")
+    runstate.labeling_start(len(traces))
     try: labeler.label_traces(traces)
     except Exception: log_exc("labeling failed")
     log("labeling finished")
+    runstate.labeling_end()
     # Record the night BEFORE writing stats, or the dashboard's nightly-spend chart is always one
     # night behind. record_night is INSERT OR REPLACE on date, so the second call just fixes `pushed`.
     valid = sum(1 for t in traces if t["outcome"] in ("pass", "fail", "runaway"))
@@ -151,5 +158,7 @@ def main():
     # The elapsed hours are on the done: line because a 17h night and a 2h one otherwise look identical.
     log(f"done: spent ${ledger.spent_since(t0):.2f}, {valid} valid traces, pushed={pushed}, "
         f"ran {(time.time() - t0) / 3600:.2f}h")
+    runstate.run_end(spent_usd=ledger.spent_since(t0), episodes=len(traces), valid_traces=valid,
+                     pushed=int(pushed), seconds=time.time() - t0)
 
 if __name__ == "__main__": main()

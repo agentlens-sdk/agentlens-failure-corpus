@@ -18,6 +18,7 @@ and (weekly) as a parquet dataset. Budget-capped, dead-man-switched, no human in
 - `corpus/labeler.py` Haiku batch labeling, schema-validated
 - `corpus/ledger.py` SQLite spend ledger, single source of truth
 - `corpus/redact.py` secret scrubbing on everything that leaves the process
+- `corpus/runstate.py` live run state for the watcher; best-effort, never raises into the harness
 - `site/` static dashboard, deployed to Pages by `.github/workflows/pages.yml`
 - `SETUP.md` the host steps: key, deploy key, Pages, cron, spend limit
 - `BUILD.md` the original build checklist
@@ -79,5 +80,22 @@ Host setup is in `SETUP.md`. Once that is done, `run_nightly.sh` is the whole op
 cron and launchd cannot read a repo under `~/Downloads` (privacy protection fails them silently), so
 either keep the repo elsewhere or run `. ~/.corpus.env && ./run_nightly.sh` by hand once a day.
 A `STOPPED` file in the repo root halts everything; the file names the reason. Delete it to resume.
+
+## Watching a run
+
+`tail -f logs/$(date +%F).log` is the transcript. `site/live.html` is the state:
+
+    ./watch.sh          # serves the repo root on 127.0.0.1:8777, prints the URL, opens nothing
+
+Then open <http://127.0.0.1:8777/site/live.html>. It polls `data/runstate.json` every 2s and shows
+the night in three parts: what was queued (budget, episode count, models, families, deadline), what
+is happening (episodes in flight and for how long, turns, spend and spend rate, time to the
+deadline, errors and runaways), and what has come out (pass/fail counts, labels as the labeler
+returns them, and the last failures with the checker's evidence). With no run going it says so
+rather than erroring, and a finished run stays on screen with its totals.
+
+`corpus/runstate.py` writes that snapshot, plus an event log at `data/runstate.jsonl` truncated at
+each run start. Both are local scratch — gitignored, never published — and every call into them is
+wrapped: the watcher can fail in any way it likes without costing the run an episode.
 
 Data license: CC-BY-4.0. Code: MIT.
