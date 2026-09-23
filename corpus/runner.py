@@ -7,7 +7,7 @@ per turn, a tool span per tool call. The envelope is embedded in the saved trace
 import json, time
 from pathlib import Path
 import anthropic
-from . import ledger
+from . import ledger, runstate
 from .agentlens_export import EpisodeTrace, export, ulid
 from .ledger import CFG
 from .redact import redact
@@ -48,6 +48,7 @@ def run_episode(proto, model=None, client=None):
     al = EpisodeTrace(episode_id, task.family, task.task_id, model, prompt=task.prompt, system=task.system)
     trace = {"episode_id": episode_id, "family": task.family, "task_id": task.task_id, "model": model,
              "started": time.time(), "turns": [], "trace_id": al.trace_id}
+    runstate.episode_start(episode_id, task.family, task.task_id, model)   # best-effort, see runstate
     messages = [{"role": "user", "content": task.prompt}]
     system = [{"type": "text", "text": task.system, "cache_control": {"type": "ephemeral"}}]
     cost, total_tokens, outcome, t0 = 0.0, 0, "error", time.time()
@@ -71,6 +72,7 @@ def run_episode(proto, model=None, client=None):
             trace["turns"].append({"assistant": content, "usage": usage, "stop_reason": resp.stop_reason,
                                    "served_model": getattr(resp, "model", None),
                                    "request_id": getattr(resp, "_request_id", None)})
+            runstate.episode_turn(episode_id, len(trace["turns"]))
             messages.append({"role": "assistant", "content": content})
             if resp.stop_reason != "tool_use":
                 break
@@ -93,6 +95,7 @@ def run_episode(proto, model=None, client=None):
         outcome = "runaway"; err = str(e); trace["runaway_reason"] = str(e)
     except Terminal:
         al.finish("error", cost, error="terminal API error")
+        runstate.episode_end(episode_id, "error", len(trace["turns"]), cost, "terminal API error")
         raise
     except Exception as e:
         outcome = "error"; err = redact(str(e))[:2000]; trace["error"] = err
@@ -104,4 +107,5 @@ def run_episode(proto, model=None, client=None):
     path.write_text(json.dumps(trace, default=str))
     ledger.record_episode(episode_id=episode_id, ts=t0, family=task.family, task_id=task.task_id, model=model,
                           turns=len(trace["turns"]), outcome=outcome, label=None, cost_usd=cost, trace_path=str(path))
+    runstate.episode_end(episode_id, outcome, len(trace["turns"]), cost, err)
     return trace

@@ -7,4 +7,5 @@ __pycache__/
 *.egg-info/
 review/answers.json
 review/review.html
+data/runstate.json*
 .claude/worktrees/

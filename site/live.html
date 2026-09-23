@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AgentLens Failure Corpus — live run</title>
+<!-- Watches data/runstate.json, written by corpus/runstate.py. Serve the repo root (./watch.sh) and
+     open /site/live.html; the path below is relative to that root. No build step, no network. -->
+<style>
+:root{--ink:#1c2230;--paper:#f7f8f6;--rule:#c9cfc6;--fail:#b3412c;--pass:#2f6f4f;--mute:#6a7268;--wash:#eceee9}
+@media(prefers-color-scheme:dark){:root{--ink:#e6e8e3;--paper:#161a18;--rule:#3a423c;--mute:#9aa397;--wash:#1e2320;--fail:#d9705c;--pass:#6fae8b}}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 "Iowan Old Style","Palatino Linotype",Georgia,serif;max-width:78ch;padding:3rem 1.25rem 5rem;margin-inline:auto}
+h1{font-weight:400;font-size:2.1rem;letter-spacing:-.01em;margin:0 0 .25rem}h1 b{font-weight:700}
+.sub{color:var(--mute);margin:0 0 2rem}a{color:inherit}
+h2{font-weight:400;font-size:1.25rem;margin:2.5rem 0 .75rem}
+h2 span{color:var(--mute);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;margin-right:.5rem}
+.note{color:var(--mute);font-size:.9rem;margin:-.4rem 0 1rem}
+table{width:100%;border-collapse:collapse;margin:0 0 1.5rem;font-size:.95rem}
+td,th{text-align:left;padding:.35rem .4rem .35rem 0;border-bottom:1px solid var(--rule)}
+th{font-weight:400;color:var(--mute)}td.n{text-align:right;font-variant-numeric:tabular-nums}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem}
+.tn{color:var(--mute);font-size:.75rem}
+.empty{color:var(--mute);font-style:italic}
+.gauge{border:1px solid var(--rule);height:8px;margin:.35rem 0 1.25rem;position:relative}
+.gauge i{position:absolute;inset:0;width:0;background:var(--ink)}
+.gauge.warn i{background:var(--fail)}
+.banner{border:2px solid var(--rule);padding:.75rem 1rem;margin:0 0 2rem}
+.banner.live{border-color:var(--pass)}.banner.done{border-color:var(--ink)}.banner.bad{border-color:var(--fail)}
+.dot{display:inline-block;width:.5rem;height:.5rem;border-radius:50%;background:var(--pass);margin-right:.45rem;vertical-align:middle}
+.stale .dot{background:var(--fail)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin:0 0 1.5rem}
+@media(max-width:600px){.tiles{grid-template-columns:repeat(2,1fr)}body{padding:2rem 1rem 4rem}h1{font-size:1.6rem}}
+.tile{border:1px solid var(--rule);padding:.5rem .6rem;background:var(--wash)}
+.tile b{display:block;font-size:1.45rem;font-weight:400;font-variant-numeric:tabular-nums;line-height:1.25}
+.tile>span{color:var(--mute);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase}
+.tile em{font-style:normal;color:var(--mute);font-size:.75rem}
+.pill{font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--mute);color:var(--mute);padding:.05rem .35rem;margin-left:.3rem;white-space:nowrap}
+.pill.fail{border-color:var(--fail);color:var(--fail)}.pill.pass{border-color:var(--pass);color:var(--pass)}
+details{border:1px solid var(--rule);margin:0 0 .5rem;background:var(--wash)}
+summary{padding:.5rem .75rem;cursor:pointer;font-size:.95rem}
+summary::marker{color:var(--mute)}
+.body{padding:.5rem .75rem .75rem;border-top:1px solid var(--rule)}
+.ev{border-left:2px solid var(--rule);padding-left:.75rem;margin:.5rem 0 0;color:var(--mute);white-space:pre-wrap;font-size:.9rem}
+.bar{display:inline-block;height:.5rem;background:var(--ink);vertical-align:middle;margin-right:.4rem}
+.wrap{overflow-x:auto}
+.zone{display:none}
+</style></head><body>
+
+<h1><b>AgentLens</b> live run</h1>
+<p class="sub">What tonight's run is doing, right now. The dashboard of finished work is
+<a href="index.html">index.html</a>.</p>
+
+<div id="banner" class="banner">Looking for a run…</div>
+
+<div id="zones">
+  <div class="zone" id="zone-in">
+    <h2><span>Input</span>What was queued</h2>
+    <table id="input"></table>
+    <details id="plan-box"><summary>Task queue</summary><div class="body wrap"><table id="plan"></table></div></details>
+  </div>
+
+  <div class="zone" id="zone-proc">
+    <h2><span>Process</span>In flight</h2>
+    <div class="tiles" id="tiles"></div>
+    <p class="note" id="gauges-note">Episodes done, and spend against tonight's budget.</p>
+    <div class="gauge"><i id="g-eps"></i></div>
+    <div class="gauge" id="g-spend-box"><i id="g-spend"></i></div>
+    <div class="wrap"><table id="flight"></table></div>
+    <div id="errors"></div>
+  </div>
+
+  <div class="zone" id="zone-out">
+    <h2><span>Output</span>Episodes finished</h2>
+    <div class="wrap"><table id="outcomes"></table></div>
+    <table id="labels"></table>
+    <h2><span>Output</span>Recent failures</h2>
+    <p class="note">The last few non-passing episodes, with the label and the checker's evidence as
+    soon as labeling reaches them.</p>
+    <div id="fails"></div>
+    <h2><span>Output</span>Last episodes</h2>
+    <div class="wrap"><table id="recent"></table></div>
+  </div>
+</div>
+
+<p class="tn" id="foot"></p>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+const n=x=>(x==null?0:x).toLocaleString();
+const usd=x=>'$'+(x||0).toFixed(2);
+const short=m=>String(m||'').replace(/^claude-/,'').replace(/-\d{8}$/,'');
+const clock=ts=>{try{return new Date(ts*1000).toTimeString().slice(0,8)}catch(e){return '—'}};
+function dur(s){
+  if(s==null||!isFinite(s))return '—';
+  s=Math.max(0,Math.round(s));
+  const h=Math.floor(s/3600),m=Math.floor(s%3600/60);
+  return h?`${h}h ${String(m).padStart(2,'0')}m`:(m?`${m}m ${String(s%60).padStart(2,'0')}s`:`${s}s`);
+}
+const rows=(el,head,body)=>{$(el).innerHTML=(head?`<tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr>`:'')+body};
+
+let data=null, everLoaded=false, lost=false, sig=null, staleShown=false;
+
+// The browser's clock, compared directly against the epoch seconds in the snapshot. Anchoring to
+// data.updated instead would make every counter restart at each poll, and a run that had gone quiet
+// would look fresh forever. Both clocks are the same machine's: watch.sh serves this beside the
+// harness that wrote the file.
+const now=()=>Date.now()/1000;
+
+// Redrawing the whole page on a timer would close every <details> the reader opened and drop any
+// selection, so the DOM is rebuilt only when the snapshot actually changes; tick() moves the clocks
+// in between, and openKeys remembers what was open across a rebuild.
+const openKeys=new Set();
+document.addEventListener('toggle',e=>{
+  const k=e.target.dataset&&e.target.dataset.k; if(!k)return;
+  e.target.open?openKeys.add(k):openKeys.delete(k);
+},true);
+const isOpen=k=>openKeys.has(k)?' open':'';
+
+async function poll(){
+  try{
+    const r=await fetch('../data/runstate.json?'+Date.now(),{cache:'no-store'});
+    if(!r.ok)throw new Error(r.status);
+    data=await r.json(); everLoaded=true; lost=false;
+  }catch(e){ lost=everLoaded; if(!everLoaded)data=null; }
+  render();
+}
+
+function tick(){
+  if(!data)return;
+  const t=now();
+  document.querySelectorAll('[data-since]').forEach(e=>{e.textContent=dur(t-(+e.dataset.since))});
+  document.querySelectorAll('[data-until]').forEach(e=>{const v=+e.dataset.until;
+    e.textContent=v>t?dur(v-t)+(e.dataset.suffix||''):(e.dataset.past||'passed')});
+  const over=data.status==='finished'||data.status==='stopped';
+  if(!over&&((t-data.updated)>600)!==staleShown)render(true);   // the run went quiet, or came back
+}
+
+function render(force){
+  const s=data?JSON.stringify(data)+lost:'none'+everLoaded;
+  if(!force&&s===sig){tick();return}
+  sig=s;
+  if(!data){
+    $('banner').className='banner';
+    $('banner').innerHTML='<b>No run in progress.</b><p class="note" style="margin:.4rem 0 0">'+
+      'Nothing has published <code>data/runstate.json</code> yet. Start a night with '+
+      '<code>. ~/.corpus.env &amp;&amp; ./run_nightly.sh</code> and this page fills in on its own.</p>';
+    document.querySelectorAll('.zone').forEach(z=>z.style.display='none');
+    $('foot').textContent='';
+    return;
+  }
+  document.querySelectorAll('.zone').forEach(z=>z.style.display='block');
+  const r=data.run, c=data.counts, sp=data.spend, t=now();
+  const over = data.status==='finished'||data.status==='stopped';
+  const stale = !over && (t-data.updated)>600;   // 10 min without an event, while a run is open
+  staleShown = stale;
+
+  // ---- banner -------------------------------------------------------------
+  let cls='banner live', head;
+  if(data.status==='stopped'){cls='banner bad'; head=`<b>Run stopped.</b> ${esc((r.summary||{}).stopped||'')}`;}
+  else if(data.status==='finished'){
+    const s=r.summary||{};
+    cls='banner done';
+    head=`<b>Run finished.</b> ${n(s.episodes)} episodes, ${n(s.valid_traces)} valid traces, `+
+         `${usd(s.spent_usd)} spent in ${dur(s.seconds)}${s.pushed?', pushed':''}.`;
+  } else {
+    const label={running:'Running',labeling:'Labeling',publishing:'Publishing'}[data.status]||data.status;
+    head=`<span class="dot"></span><b>${esc(label)}</b> — night of ${esc(r.date)}, `+
+         `started ${clock(r.started)}, <span data-since="${r.started}"></span> elapsed.`;
+    if(stale)head+=` <span class="pill fail">no event for <span data-since="${data.updated}"></span></span>`;
+  }
+  if(lost)head+=' <span class="pill fail">file unreadable, showing last state</span>';
+  if(r.note&&!over)head+=`<p class="note" style="margin:.4rem 0 0">${esc(r.note)}</p>`;
+  $('banner').className=stale?'banner bad stale':cls;
+  $('banner').innerHTML=head;
+
+  // ---- input --------------------------------------------------------------
+  const left=r.deadline-t;
+  rows('input',null,
+    row('night',esc(r.date))+
+    row('budget',usd(r.budget_usd))+
+    row('episodes queued',n(r.queued))+
+    row('models',(r.models||[]).map(m=>`${esc(short(m.model))} <span class=tn>&times;${n(m.n)}</span>`).join(' · ')||'—')+
+    row('families',(r.families||[]).map(f=>`${esc(f.family)} <span class=tn>&times;${n(f.n)}</span>`).join(' · ')||'—')+
+    row('deadline',`${clock(r.deadline)} <span class=tn>${over?'':
+      `<span data-until="${r.deadline}" data-suffix=" left" data-past="passed"></span>`}</span>`));
+  const plan=r.plan||[];
+  $('plan-box').style.display=plan.length?'block':'none';
+  rows('plan',['task','episodes'],plan.map(p=>
+    `<tr><td class=mono>${esc(p.task_id)}</td><td class=n>${n(p.n)}</td></tr>`).join(''));
+
+  // ---- process ------------------------------------------------------------
+  const elapsedMin=Math.max(1/60,(t-r.started)/60);
+  const rate=sp.usd/elapsedMin;
+  const ep=c.finished/Math.max(1,c.queued);
+  $('tiles').innerHTML=
+    tile(n(c.in_flight),'in flight',`${n(c.finished)} of ${n(c.queued)} done`)+
+    tile(usd(sp.usd),'spent',`${usd(rate*60)}/h of ${usd(sp.budget_usd)}`)+
+    tile(over?dur(r.ended-r.started):`<span data-until="${r.deadline}" data-past="0s"></span>`,
+         over?'ran for':'to deadline',
+         over?`ended ${clock(r.ended)}`:`deadline ${clock(r.deadline)}`)+
+    tile(c.finished?(c.turns/c.finished).toFixed(1):'—','turns / episode',`${n(c.turns)} turns total`);
+  $('g-eps').style.width=Math.min(100,100*ep)+'%';
+  $('g-spend').style.width=Math.min(100,100*sp.usd/Math.max(.01,sp.budget_usd))+'%';
+  $('g-spend-box').className='gauge'+(sp.usd>=sp.budget_usd*0.9?' warn':'');
+  $('gauges-note').innerHTML=`${n(c.finished)} of ${n(c.queued)} episodes (${(100*ep).toFixed(0)}%), `+
+    `${usd(sp.usd)} of ${usd(sp.budget_usd)} (${(100*sp.usd/Math.max(.01,sp.budget_usd)).toFixed(0)}%, `+
+    `${sp.source==='ledger'?'from the ledger':'summed from episodes'}).`;
+
+  const fl=data.in_flight||[];
+  rows('flight',['running now','model','turns so far','elapsed'],
+    fl.length?fl.map(e=>`<tr><td class=mono>${esc(e.task_id)}</td><td class=mono>${esc(short(e.model))}</td>`+
+      `<td class=n>${e.turns==null?'—':n(e.turns)}</td>`+
+      `<td class=n><span data-since="${e.started}"></span></td></tr>`).join('')
+    :`<tr><td colspan=4 class=empty>${over?'Run is over; nothing in flight.':'Nothing in flight right now.'}</td></tr>`);
+
+  const errs=data.errors||[];
+  $('errors').innerHTML=errs.length?
+    '<p class="note">Errors and runaways, most recent first.</p>'+errs.map(e=>
+      `<details data-k="err:${esc(e.ts)}"${isOpen('err:'+e.ts)}>`+
+      `<summary><span class=mono>${esc(e.task_id)}</span><span class="pill fail">${esc(e.outcome)}</span>`+
+      ` <span class=tn>${clock(e.ts)}</span></summary><div class=body><div class=ev>${esc(e.error)}</div></div></details>`).join('')
+    :'<p class="note">No errors or runaways so far.</p>';
+
+  // ---- output -------------------------------------------------------------
+  const oc=c.outcomes||{}, tot=Object.values(oc).reduce((a,b)=>a+b,0);
+  rows('outcomes',['outcome','episodes','share'],
+    tot?Object.entries(oc).sort((a,b)=>b[1]-a[1]).map(([k,v])=>
+      `<tr><td>${esc(k)}</td><td class=n>${n(v)}</td>`+
+      `<td class=n><i class=bar style="width:${(60*v/tot).toFixed(0)}px"></i>${(100*v/tot).toFixed(0)}%</td></tr>`).join('')
+    :'<tr><td colspan=3 class=empty>No episode has finished yet.</td></tr>');
+
+  const labs=data.labels||[];
+  rows('labels',['label','count'],
+    labs.length?labs.map(l=>`<tr><td>${esc(l.label)}</td><td class=n>${n(l.n)}</td></tr>`).join('')
+    :`<tr><td colspan=2 class=empty>${data.labeling?'Labeling in progress…':'Labels arrive after the episodes are done.'}</td></tr>`);
+
+  const fails=data.failures||[];
+  $('fails').innerHTML=fails.length?fails.map(f=>
+    `<details data-k="${esc(f.episode_id)}"${isOpen(f.episode_id)}>`+
+    `<summary><span class=mono>${esc(f.task_id)}</span>`+
+    `<span class="pill fail">${esc(f.label||f.outcome)}</span> `+
+    `<span class=tn>${esc(short(f.model))} &middot; ${n(f.turns)} turns &middot; ${dur(f.seconds)} &middot; ${clock(f.ended)}</span>`+
+    `</summary><div class=body>`+
+    (f.evidence?`<div class=ev>${esc(f.evidence)}</div>`:
+      `<p class="empty" style="margin:0">${f.error?esc(f.error):'Not labeled yet.'}</p>`)+
+    `</div></details>`).join('')
+    :'<p class="empty">No failures yet.</p>';
+
+  const rec=data.recent||[];
+  rows('recent',['task','model','outcome','turns','secs','cost','label'],
+    rec.length?rec.map(e=>
+      `<tr><td class=mono>${esc(e.task_id)}</td><td class=mono>${esc(short(e.model))}</td>`+
+      `<td class="${e.outcome==='pass'?'':'mono'}">${esc(e.outcome)}</td>`+
+      `<td class=n>${n(e.turns)}</td><td class=n>${dur(e.seconds)}</td>`+
+      `<td class=n>$${(e.cost_usd||0).toFixed(3)}</td><td class=tn>${esc(e.label||'')}</td></tr>`).join('')
+    :'<tr><td colspan=7 class=empty>Waiting for the first episode to finish.</td></tr>');
+
+  $('foot').innerHTML=`Snapshot written ${clock(data.updated)} `+
+    `(<span data-since="${data.updated}"></span> ago), polled every 2s.`;
+  tick();
+}
+
+const row=(k,v)=>`<tr><th>${k}</th><td>${v}</td></tr>`;
+const tile=(big,lab,sub)=>`<div class=tile><span>${lab}</span><b>${big}</b><em>${sub}</em></div>`;
+
+poll(); setInterval(poll,2000); setInterval(tick,1000);
+</script></body></html>

@@ -9,7 +9,7 @@ A reply without a usable label -> 'unclassified'. Never retried.
 """
 import json, time
 import anthropic, jsonschema
-from . import ledger
+from . import ledger, runstate
 from .ledger import CFG
 
 LABEL_DEFINITIONS = {
@@ -135,6 +135,7 @@ def _record(episode_id, label, confidence, evidence):
     with ledger.conn() as c:
         c.execute("UPDATE episodes SET label=?, confidence=?, evidence=? WHERE episode_id=?",
                   (label, confidence, evidence, episode_id))
+    runstate.label(episode_id, label, confidence, evidence)   # best-effort, see runstate
 
 def label_traces(traces, wait_seconds=7200):
     labels, for_model = {}, []
