@@ -5,3 +5,6 @@ __pycache__/
 .env
 .venv/
 *.egg-info/
+review/answers.json
+review/review.html
+.claude/worktrees/

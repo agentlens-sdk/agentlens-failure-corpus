@@ -1,0 +1,637 @@
+{
+ "sample_id": "s7-n100-ca5784e936",
+ "seed": 7,
+ "n": 100,
+ "population": 500,
+ "nightly_only": true,
+ "generated": "2026-09-23T23:00:51+00:00",
+ "strata": {
+  "gave_up": {
+   "population": 1,
+   "sampled": 1,
+   "weight": 1.0
+  },
+  "misread_spec": {
+   "population": 364,
+   "sampled": 72,
+   "weight": 5.055555555555555
+  },
+  "premature_stop": {
+   "population": 99,
+   "sampled": 19,
+   "weight": 5.2105263157894735
+  },
+  "tool_misuse": {
+   "population": 34,
+   "sampled": 6,
+   "weight": 5.666666666666667
+  },
+  "wrong_target": {
+   "population": 2,
+   "sampled": 2,
+   "weight": 1.0
+  }
+ },
+ "episodes": [
+  {
+   "episode_id": "tools-retail_stack_ticket_queue-01M2F3E2EQRXKJQNKNZSX2PJSC",
+   "task_id": "retail_stack_ticket_queue",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_three_way_two_hours-01M33N1QC5VW5DNSEGQCQQ4X3B",
+   "task_id": "cal_hard_three_way_two_hours",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M3399PW07H3TTEW4V29MR3F5",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_stack_week_planner-01M2PQ998EVF3KGW0MS09VB1CP",
+   "task_id": "cal_stack_week_planner",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_spill_to_next_day-01M2H5EP7H8SPAW67FR4BQ776K",
+   "task_id": "cal_spill_to_next_day",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_stack_week_planner-01M33QSE41BY8PAW14TSPFAJSC",
+   "task_id": "cal_stack_week_planner",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-ops_hard_triage_all_open-01M2F3WRQW5TZ40PGE13D03T63",
+   "task_id": "ops_hard_triage_all_open",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_stack_disruption-01M33KHZ8R674Q63JV7ASC42BS",
+   "task_id": "air_stack_disruption",
+   "agent_model": "claude-sonnet-5",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-ops_hard_triage_all_open-01M33ZWDS0F4RS5CT2A5GBQ151",
+   "task_id": "ops_hard_triage_all_open",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-retail_stack_ticket_queue-01M2H2X67JZY51YM65P2EQJY8J",
+   "task_id": "retail_stack_ticket_queue",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_stack_disruption-01M2F3QZDMQWNFZV3Y8CAVV4CV",
+   "task_id": "air_stack_disruption",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_three_way_two_hours-01M338QY8TBQR5BK10RZ9JPS32",
+   "task_id": "cal_hard_three_way_two_hours",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-retail_stack_ticket_queue-01M2H3JBFJ00DAJ1SG259EJARD",
+   "task_id": "retail_stack_ticket_queue",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "wrong_target"
+  },
+  {
+   "episode_id": "tools-retail_stack_ticket_queue-01M33ZXSNSJ2NHRX0Z1N6ETVWK",
+   "task_id": "retail_stack_ticket_queue",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_rebook_earliest_after_noon-01M2H3GGQ4Q96ZGV1KPZ3QSKPZ",
+   "task_id": "air_rebook_earliest_after_noon",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_stack_week_planner-01M3392G4K60AMX7ZKN6Q6TPAQ",
+   "task_id": "cal_stack_week_planner",
+   "agent_model": "claude-sonnet-5",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-ops_hard_triage_all_open-01M33R042QJE6NSNPF50E2W8JK",
+   "task_id": "ops_hard_triage_all_open",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_stack_week_planner-01M33Z1HV9D1QXW0W2J5Z3DHP8",
+   "task_id": "cal_stack_week_planner",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-ops_hard_triage_all_open-01M33PD4NPY63DYKD23Y7EY6J6",
+   "task_id": "ops_hard_triage_all_open",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_spill_to_next_day-01M33VEYQ1D6YEK1M241PT1KF6",
+   "task_id": "cal_spill_to_next_day",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-ops_hard_triage_all_open-01M2PNV1C37WM94E71M2SP412P",
+   "task_id": "ops_hard_triage_all_open",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M33Y8BTY4YTG65TTX4CYDGSA",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-sonnet-5",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-ops_stack_night_shift-01M33ZR8EJG77FQ7E63D8GC9PQ",
+   "task_id": "ops_stack_night_shift",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_three_way_two_hours-01M33PC16XQWQX9351H2PM764T",
+   "task_id": "cal_hard_three_way_two_hours",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_common_free_hour-01M2H50FDZRNMXV7D8ZHQWFEHV",
+   "task_id": "cal_common_free_hour",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M33R8PKXYVWN4V6MGC57W733",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-sonnet-5",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-air_hard_rebook_latest_that_lands-01M340580CG9M798E1658AXRWB",
+   "task_id": "air_hard_rebook_latest_that_lands",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "tool_misuse"
+  },
+  {
+   "episode_id": "tools-air_stack_disruption-01M33A8KEMZTK0F469QB7G76YN",
+   "task_id": "air_stack_disruption",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_rebook_earliest_after_noon-01M33R042HRRWWDF4BR0TX07SE",
+   "task_id": "air_rebook_earliest_after_noon",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_common_free_hour-01M33P0SCWYYYFN0ZD1DCEN78A",
+   "task_id": "cal_common_free_hour",
+   "agent_model": "claude-sonnet-5",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M33Z3K6Q0VK21YX9Q70H8YF1",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-sonnet-5",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M33P26QG2ZHKS84GRY6A1SPT",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_hard_rebook_latest_that_lands-01M2H410A07GREJPABRG4YNB4N",
+   "task_id": "air_hard_rebook_latest_that_lands",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "tool_misuse"
+  },
+  {
+   "episode_id": "tools-cal_stack_week_planner-01M33KWECXZKVZV9EWMXRNP7W2",
+   "task_id": "cal_stack_week_planner",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_common_free_hour-01M33YQEGQM6XTYFYXMKPY56WH",
+   "task_id": "cal_common_free_hour",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-retail_stack_ticket_queue-01M3405QX5G7FBRT9W4E76HTG8",
+   "task_id": "retail_stack_ticket_queue",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-ops_stack_night_shift-01M2PQ493VYBBHK81N8TZD7FKG",
+   "task_id": "ops_stack_night_shift",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M33RG3GZX3XNPPH9XY371GXY",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_rebook_earliest_after_noon-01M33R1HAPDYR64ZJAKXFPXMST",
+   "task_id": "air_rebook_earliest_after_noon",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-retail_stack_ticket_queue-01M33XCZ8AH52PQQ88XVZ9RWJM",
+   "task_id": "retail_stack_ticket_queue",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_stack_week_planner-01M2V49594Q2G7MK1KVSQJ4P5T",
+   "task_id": "cal_stack_week_planner",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_no_double_book-01M340X5T3Y4A2VMKGZEFDZQ1Y",
+   "task_id": "cal_no_double_book",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_hard_cancel_window_boundary-01M33X6J092CSYKXP7YTB6XR6W",
+   "task_id": "air_hard_cancel_window_boundary",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-ops_stack_night_shift-01M33NXECJ5N09RSJSQDHES3G2",
+   "task_id": "ops_stack_night_shift",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M33KV6TDQVBYBZ9RNDAXQAZT",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-sonnet-5",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-air_hard_rebook_latest_that_lands-01M33RMGDTKHWFZERQQFD8D0W0",
+   "task_id": "air_hard_rebook_latest_that_lands",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "gave_up"
+  },
+  {
+   "episode_id": "tools-ops_stack_night_shift-01M3425B3CB687SRB5Q6WK56AC",
+   "task_id": "ops_stack_night_shift",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-air_rebook_earliest_after_noon-01M2F4YPFVZX66JRCN75HNAM01",
+   "task_id": "air_rebook_earliest_after_noon",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_change_flexible-01M2F2SJBAPYMBAK8XT9DD0VM1",
+   "task_id": "air_change_flexible",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-retail_stack_ticket_queue-01M341QS1D1EMQHNF9BJNYMMTW",
+   "task_id": "retail_stack_ticket_queue",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_stack_disruption-01M33W3F7B2TQ43XSQX9R2RAS5",
+   "task_id": "air_stack_disruption",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M33NSP7TQNPYPTF7VCG2CH83",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-sonnet-5",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-retail_stack_ticket_queue-01M33NPYVF0TQP0PBMT5AFRA67",
+   "task_id": "retail_stack_ticket_queue",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_rebook_earliest_after_noon-01M33NC9RADJ9G7JT84C2SYXV8",
+   "task_id": "air_rebook_earliest_after_noon",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-ops_hard_triage_all_open-01M33NXECEQMGEH9BZY7Z6N7S4",
+   "task_id": "ops_hard_triage_all_open",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M2PP0NYWZXDN5WM6JDH2CKH2",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-sonnet-5",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_hard_rebook_latest_that_lands-01M33RNVPKCJ45ADWJXNC1P0XB",
+   "task_id": "air_hard_rebook_latest_that_lands",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "tool_misuse"
+  },
+  {
+   "episode_id": "tools-air_rebook_earliest_after_noon-01M2H5CZKKXF5YGHYZPSE115Z1",
+   "task_id": "air_rebook_earliest_after_noon",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_rebook_earliest_after_noon-01M2PNWHMAP1AXGD1DH4MHEA4F",
+   "task_id": "air_rebook_earliest_after_noon",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_rebook_earliest_after_noon-01M2KSD6MTGYKSTZH2ZZ0AWMG7",
+   "task_id": "air_rebook_earliest_after_noon",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-retail_stack_ticket_queue-01M33WZ3WET325NKKZM0FX9XKT",
+   "task_id": "retail_stack_ticket_queue",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_change_flexible-01M2F4650086HJR1GQAEKRGN1S",
+   "task_id": "air_change_flexible",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_stack_disruption-01M338RJV4CPAEFKQ64DYBYKPQ",
+   "task_id": "air_stack_disruption",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-air_stack_disruption-01M2V051XQVW8WRWKXQ7RMNC8V",
+   "task_id": "air_stack_disruption",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_rebook_earliest_after_noon-01M339YEC0CQXKJ9CWHZV9EG28",
+   "task_id": "air_rebook_earliest_after_noon",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_no_double_book-01M2KSJ12BTDZBMM8YJNSTR8SS",
+   "task_id": "cal_no_double_book",
+   "agent_model": "claude-sonnet-5",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-cal_no_double_book-01M33XHCJH4SDNGPJPJW5CXPJY",
+   "task_id": "cal_no_double_book",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_rebook_earliest_after_noon-01M33Q1A98AHBGP3XVN0YA0AH9",
+   "task_id": "air_rebook_earliest_after_noon",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-ops_stack_night_shift-01M33S0QMRAGRD54RSCM8CQK6E",
+   "task_id": "ops_stack_night_shift",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-retail_stack_ticket_queue-01M33PD4NZ8EJJE7DPV9ZQH14T",
+   "task_id": "retail_stack_ticket_queue",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_three_way_two_hours-01M340DRYAR048K9QMEVWN95T2",
+   "task_id": "cal_hard_three_way_two_hours",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M2V0Q3TAX80Q1PMXQQS2WZP8",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_stack_week_planner-01M2F34EDJSYSX4RJRNADPZAZE",
+   "task_id": "cal_stack_week_planner",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-ops_hard_triage_all_open-01M2F5364WJHAM6BVPQAR6K4SC",
+   "task_id": "ops_hard_triage_all_open",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_hard_rebook_latest_that_lands-01M33KRA8MJJGKJ17CF2VNVNW5",
+   "task_id": "air_hard_rebook_latest_that_lands",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "tool_misuse"
+  },
+  {
+   "episode_id": "tools-cal_stack_week_planner-01M33ZT65BGF7NVAG8DAWKWEN6",
+   "task_id": "cal_stack_week_planner",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-ops_stack_night_shift-01M342397HDQ5CAA11N2053YPK",
+   "task_id": "ops_stack_night_shift",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "wrong_target"
+  },
+  {
+   "episode_id": "tools-air_hard_rebook_latest_that_lands-01M2PPSRHZ8S7H2VC9AP5DQMXT",
+   "task_id": "air_hard_rebook_latest_that_lands",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "tool_misuse"
+  },
+  {
+   "episode_id": "tools-air_stack_disruption-01M33MF2H6QAXAY18ASC7ZC2CC",
+   "task_id": "air_stack_disruption",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "tool_misuse"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M33A1B168RXGN19XH241JGWV",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M33XFGEGRHNKD180KP4VAX3Q",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M2KSXN736P07AT7G8BJ9TQRC",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-sonnet-5",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M2H5AW3FFKN0ACHRM5CV2YSE",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-retail_stack_ticket_queue-01M2H4XEYDH1TGQTS4N0QF0DTZ",
+   "task_id": "retail_stack_ticket_queue",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_no_double_book-01M33Z0H1G8JH4BS4SS26ANYQW",
+   "task_id": "cal_no_double_book",
+   "agent_model": "claude-sonnet-5",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-air_rebook_earliest_after_noon-01M2PQTR14ANFMS77J3WYZATS3",
+   "task_id": "air_rebook_earliest_after_noon",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_spill_to_next_day-01M33QFW719BRGWK7GNK8939QB",
+   "task_id": "cal_spill_to_next_day",
+   "agent_model": "claude-sonnet-5",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-air_stack_disruption-01M3401S9SNKJWC8KP7PP2P81C",
+   "task_id": "air_stack_disruption",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_rebook_earliest_after_noon-01M33Q83Y0C3GJV469RM3BKVF1",
+   "task_id": "air_rebook_earliest_after_noon",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-ops_stack_night_shift-01M2F3S20558Z5QBXT09MFEDFQ",
+   "task_id": "ops_stack_night_shift",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_stack_week_planner-01M33XB933QTWDKKAS7VP2DV87",
+   "task_id": "cal_stack_week_planner",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_rebook_earliest_after_noon-01M33XCZ7WTM10658AS40M3KFK",
+   "task_id": "air_rebook_earliest_after_noon",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M2H3TBC9T5WV0770AB17HHPA",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_spill_to_next_day-01M33MADT4M17S2A4M4ERTV3X4",
+   "task_id": "cal_spill_to_next_day",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-cal_hard_timezone_spill-01M341JDSKHKXHFKPX6BBSSR2R",
+   "task_id": "cal_hard_timezone_spill",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-cal_stack_week_planner-01M2H32EWZKSN8JT3RRWE445WR",
+   "task_id": "cal_stack_week_planner",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-retail_address_plus_capped_discount-01M33ZT64TXMWFCX01ZE944TPN",
+   "task_id": "retail_address_plus_capped_discount",
+   "agent_model": "claude-sonnet-5",
+   "model_label": "misread_spec"
+  },
+  {
+   "episode_id": "tools-air_stack_disruption-01M2V4HK6DY2F1A79N3TK1W5BJ",
+   "task_id": "air_stack_disruption",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-ops_stack_night_shift-01M339JNA7HQE230XHPRSB5RAF",
+   "task_id": "ops_stack_night_shift",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "premature_stop"
+  },
+  {
+   "episode_id": "tools-ops_stack_night_shift-01M33RJG2EXY9NZ12XZKRY901D",
+   "task_id": "ops_stack_night_shift",
+   "agent_model": "claude-haiku-4-5-20251001",
+   "model_label": "misread_spec"
+  }
+ ]
+}
