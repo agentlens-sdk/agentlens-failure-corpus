@@ -105,8 +105,11 @@ def main():
         for fam in ("tools", "flakiness"):
             s = [e for e in P if e[4] == m and e[2] == fam]
             k = sum(e[6] == "pass" for e in s)
-            rows.append([SHORT[m], fam, len(s), pct(k, len(s)), f"{sum(e[8] or 0 for e in s) / max(len(s), 1):.4f}"])
-    out += ["## Pass rate by model (paired runs)", "", table(["model", "family", "n", "pass rate", "USD/episode"], rows), ""]
+            spend = sum(e[8] or 0 for e in s)
+            rows.append([SHORT[m], fam, len(s), pct(k, len(s)), f"{spend / max(len(s), 1):.4f}",
+                         f"{spend / k:.4f}" if k else "n/a"])
+    out += ["## Pass rate by model (paired runs)", "",
+            table(["model", "family", "n", "pass rate", "USD/episode", "USD/passing episode"], rows), ""]
 
     # Per task: both models on the same task. Sign test over tasks where the rates differ.
     by = collections.defaultdict(lambda: [0, 0])

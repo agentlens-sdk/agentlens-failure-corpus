@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Findings from a 5,647-episode agent failure corpus: the same prompt both passes and fails within a single batch.">
+<title>Same Prompt, Different Outcome</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+body{margin:0}img{max-width:100%}
+  :root {
+    color-scheme: light;
+    --paper: #fbfaf8;
+    --raised: #f3f1ec;
+    --ink: #14140f;
+    --ink-2: #56544d;
+    --ink-3: #85827a;
+    --rule: #e4e0d7;
+    --rule-strong: #cfcabd;
+    --sonnet: #2a78d6;
+    --haiku: #eb6834;
+    --flag: #4a3aa7;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --body: "IBM Plex Sans", system-ui, -apple-system, Segoe UI, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --paper: #17171a;
+      --raised: #1f1f23;
+      --ink: #f4f3ef;
+      --ink-2: #b3b0a6;
+      --ink-3: #8b8880;
+      --rule: #2c2c31;
+      --rule-strong: #3d3d43;
+      --sonnet: #3987e5;
+      --haiku: #d95926;
+      --flag: #9085e9;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper: #17171a;
+    --raised: #1f1f23;
+    --ink: #f4f3ef;
+    --ink-2: #b3b0a6;
+    --ink-3: #8b8880;
+    --rule: #2c2c31;
+    --rule-strong: #3d3d43;
+    --sonnet: #3987e5;
+    --haiku: #d95926;
+    --flag: #9085e9;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 47rem;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 3rem 4rem;
+  }
+  h1, h2, h3, .label, .fig, .tick, .ledger, footer a { font-family: var(--mono); }
+  h1 {
+    font-size: clamp(1.9rem, 6vw, 2.9rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    margin: 0 0 1.1rem;
+    text-wrap: balance;
+  }
+  h2 {
+    font-size: 0.82rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--ink-2);
+    margin: 0 0 1.4rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--rule-strong);
+  }
+  h3 { font-size: 0.96rem; letter-spacing: -0.01em; margin: 0 0 0.5rem; }
+  p { margin: 0 0 1.1rem; max-width: 65ch; }
+  section { margin-top: 3.2rem; }
+  strong { font-weight: 600; }
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--raised);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 0.05em 0.32em;
+  }
+  a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+  a:hover { text-decoration-color: currentColor; }
+  a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--flag); outline-offset: 2px; border-radius: 2px; }
+
+  .standfirst { font-size: 1.08rem; color: var(--ink-2); max-width: 58ch; }
+  .byline { font-family: var(--mono); font-size: 0.76rem; color: var(--ink-3); margin: 0 0 2rem; }
+
+  /* Run ledger: the corpus's own bookkeeping, in its own units */
+  .ledger {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7.2rem, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin: 2.2rem 0 0;
+    font-size: 0.72rem;
+  }
+  .ledger div { background: var(--paper); padding: 0.7rem 0.8rem; }
+  .ledger dt { color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.64rem; }
+  .ledger dd { margin: 0.2rem 0 0; font-size: 1.05rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  /* Charts */
+  figure { margin: 0 0 1.6rem; }
+  figcaption { font-size: 0.82rem; color: var(--ink-2); margin-top: 0.9rem; max-width: 62ch; }
+  .legend { display: flex; flex-wrap: wrap; gap: 1.1rem; font-family: var(--mono); font-size: 0.74rem; margin-bottom: 1.1rem; }
+  .legend span { display: inline-flex; align-items: center; gap: 0.42rem; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .dot.s { background: var(--sonnet); }
+  .dot.h { background: var(--haiku); }
+
+  .chart { --gutter: 11.5rem; }
+  .scale { display: grid; grid-template-columns: var(--gutter) 1fr 3.1rem; gap: 0.6rem; }
+  .scale .lane { position: relative; height: 1.1rem; }
+  .tick { position: absolute; transform: translateX(-50%); font-size: 0.64rem; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .tick:first-child { transform: none; }
+  .tick:last-child { transform: translateX(-100%); }
+
+  .rows { display: flex; flex-direction: column; gap: 3px; }
+  .row {
+    display: grid;
+    grid-template-columns: var(--gutter) 1fr 3.1rem;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 2px 0;
+    border-radius: 3px;
+  }
+  .row:hover, .row:focus-visible { background: var(--raised); }
+  .row .name {
+    font-family: var(--mono);
+    font-size: 0.69rem;
+    color: var(--ink-2);
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+  }
+  .row .name em { font-style: normal; color: var(--ink-3); }
+  .track {
+    position: relative;
+    height: 18px;
+    background:
+      linear-gradient(var(--rule), var(--rule)) 25% 0 / 1px 100% no-repeat,
+      linear-gradient(var(--rule), var(--rule)) 50% 0 / 1px 100% no-repeat,
+      linear-gradient(var(--rule), var(--rule)) 75% 0 / 1px 100% no-repeat;
+  }
+  .track .link { position: absolute; top: 50%; height: 2px; background: var(--rule-strong); transform: translateY(-50%); }
+  .track .pt {
+    position: absolute; top: 50%; width: 11px; height: 11px; border-radius: 50%;
+    transform: translate(-50%, -50%); box-shadow: 0 0 0 2px var(--paper);
+  }
+  .row:hover .track .pt { box-shadow: 0 0 0 2px var(--raised); }
+  .pt.s { background: var(--sonnet); }
+  .pt.h { background: var(--haiku); }
+  .gap { font-family: var(--mono); font-size: 0.72rem; text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+
+  /* Mixed-cell bars */
+  .bars { display: flex; flex-direction: column; gap: 0.55rem; }
+  .bar-row { display: grid; grid-template-columns: 9.5rem 1fr; align-items: center; gap: 0.7rem; }
+  .bar-row .name { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-2); }
+  .bar-lane { position: relative; height: 22px; display: flex; align-items: center; }
+  .bar-lane .fill { height: 13px; border-radius: 0 3px 3px 0; }
+  .bar-lane .val { font-family: var(--mono); font-size: 0.74rem; margin-left: 0.5rem; font-variant-numeric: tabular-nums; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 0.82rem; }
+  .scroll-x { overflow-x: auto; }
+  th, td { text-align: left; padding: 0.42rem 0.7rem 0.42rem 0; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  th { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; }
+  td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; padding-right: 0; }
+  td .tag { font-family: var(--mono); font-size: 0.78rem; }
+
+  .note {
+    border-left: 2px solid var(--flag);
+    padding: 0.1rem 0 0.1rem 1rem;
+    margin: 1.8rem 0;
+    color: var(--ink-2);
+    font-size: 0.93rem;
+  }
+  .note p:last-child { margin-bottom: 0; }
+
+  footer { margin-top: 3.6rem; padding-top: 1.1rem; border-top: 1px solid var(--rule-strong); font-size: 0.78rem; color: var(--ink-2); }
+  footer ul { list-style: none; padding: 0; margin: 0 0 1rem; display: flex; flex-direction: column; gap: 0.35rem; }
+  footer .k { color: var(--ink-3); display: inline-block; min-width: 6.5rem; font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  @media (max-width: 560px) {
+    .chart { --gutter: 8.2rem; }
+    .row { grid-template-columns: var(--gutter) 1fr 2.6rem; }
+    .bar-row { grid-template-columns: 7.6rem 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>The same prompt passes and fails on the same night</h1>
+  <p class="standfirst">A corpus of 5,647 agent episodes, run unattended against fixed tasks with deterministic checkers, two Claude models paired on every task. Every trace and every failure label is public.</p>
+  <p class="byline">ArkFelix7 &middot; 2026-09-22 &middot; data frozen at the 08:07Z run</p>
+
+  <dl class="ledger">
+    <div><dt>Episodes</dt><dd>5,647</dd></div>
+    <div><dt>Batches</dt><dd>8</dd></div>
+    <div><dt>Active tasks</dt><dd>22</dd></div>
+    <div><dt>Agent spend</dt><dd>$145.60</dd></div>
+    <div><dt>Window</dt><dd>Sep 7&ndash;22</dd></div>
+  </dl>
+
+  <section>
+    <h2>01 / The finding</h2>
+    <p>Run one task on one model several times in the same batch and you get a <em>cell</em>. A cell is <strong>mixed</strong> when the same prompt, unchanged, both passed and failed inside that batch. Sampling uses the API defaults; nothing else varies.</p>
+
+    <figure>
+      <div class="legend" role="note">
+        <span><i class="dot s"></i> Claude Sonnet 5</span>
+        <span><i class="dot h"></i> Claude Haiku 4.5</span>
+      </div>
+      <div class="bars" id="mixed"></div>
+      <figcaption>Share of cells (one task, one model, one batch, 2+ episodes) that contain both a pass and a failure. 280 cells in total.</figcaption>
+    </figure>
+
+    <p>Half of Sonnet 5's repeated coding cells are mixed, and two thirds of Haiku 4.5's. A benchmark that runs each task once would report a coin flip for a large share of these tasks, and call it a capability measurement.</p>
+  </section>
+
+  <section>
+    <h2>02 / Two models, same 22 tasks</h2>
+    <p>Every queued task runs once on each model, adjacent in the queue, so the comparison is paired within a batch. Tasks that no model fails are retired from the queue, so this is the frontier of difficulty for these two models, not a general capability estimate.</p>
+
+    <figure>
+      <div class="legend" role="note">
+        <span><i class="dot s"></i> Sonnet 5 pass rate</span>
+        <span><i class="dot h"></i> Haiku 4.5 pass rate</span>
+      </div>
+      <div class="chart">
+        <div class="scale"><div></div><div class="lane" id="scale"></div><div></div></div>
+        <div class="rows" id="tasks"></div>
+      </div>
+      <figcaption>Pass rate per task, sorted by the gap between the models. Hover or focus a row for the episode counts. Sonnet 5 leads on 19 of 22 tasks (sign test p = 0.00086) &mdash; and trails on three.</figcaption>
+    </figure>
+
+    <p>The gaps are not a smooth ranking. Haiku never once passes <code>ops_stack_night_shift</code> or <code>cal_stack_week_planner</code> in 84 attempts, and passes <code>hard_csv_strict</code> 4 times in 266 &mdash; while Sonnet clears each of them at 98% or better. Yet Haiku is the better model on three tasks, including a TTL cache simulation it passes 92% of the time against Sonnet's 75%.</p>
+  </section>
+
+  <section>
+    <h2>03 / How agents actually fail</h2>
+    <p>Coding failures are labeled by rerunning the submission: the first wrong case decides. Tool failures go to Claude Opus 5 with the trace and a replay diff against the reference solution, into a fixed nine-label taxonomy.</p>
+
+    <div class="scroll-x">
+      <table>
+        <thead>
+          <tr><th>Tool-failure label</th><th class="num">Sonnet 5</th><th class="num">Haiku 4.5</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="tag">misread_spec</span> &mdash; applied a stated rule wrongly</td><td class="num">13</td><td class="num">350</td></tr>
+          <tr><td><span class="tag">premature_stop</span> &mdash; skipped the final required step</td><td class="num">49</td><td class="num">48</td></tr>
+          <tr><td><span class="tag">tool_misuse</span> &mdash; real tool, wrong arguments</td><td class="num">4</td><td class="num">30</td></tr>
+          <tr><td><span class="tag">wrong_target</span> &mdash; acted on the wrong entity</td><td class="num">0</td><td class="num">2</td></tr>
+          <tr><td><span class="tag">gave_up</span> &mdash; stopped though the tools allowed it</td><td class="num">0</td><td class="num">1</td></tr>
+          <tr><td><span class="tag">hallucinated_tool</span> &mdash; invented a tool or its data</td><td class="num">0</td><td class="num">0</td></tr>
+          <tr><td><span class="tag">loop</span> &mdash; repeated steps without progress</td><td class="num">0</td><td class="num">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Across 497 labeled tool failures there is <strong>not one hallucinated tool call and not one loop</strong>. These agents fail by misreading the policy they were given. Sonnet's characteristic failure is different from Haiku's: it does the work and then stops before the confirmation message the task required.</p>
+  </section>
+
+  <section>
+    <h2>04 / What a pass costs</h2>
+    <p>Divide total spend by <em>passing</em> episodes and you get what a caller pays who retries until a checker says yes.</p>
+
+    <div class="scroll-x">
+      <table>
+        <thead>
+          <tr><th>Model / family</th><th class="num">Pass rate</th><th class="num">$ / episode</th><th class="num">$ / pass</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Sonnet 5 &middot; tools</td><td class="num">91.6%</td><td class="num">0.070</td><td class="num">0.076</td></tr>
+          <tr><td>Haiku 4.5 &middot; tools</td><td class="num">45.4%</td><td class="num">0.021</td><td class="num">0.047</td></tr>
+          <tr><td>Sonnet 5 &middot; coding</td><td class="num">88.8%</td><td class="num">0.032</td><td class="num">0.036</td></tr>
+          <tr><td>Haiku 4.5 &middot; coding</td><td class="num">55.0%</td><td class="num">0.006</td><td class="num">0.011</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>At less than half the pass rate, Haiku is still the cheaper route to a passing episode &mdash; but only where a checker can tell a pass from a failure and a retry is acceptable. On the five tasks it almost never passes, retries never converge and its expected cost is unbounded.</p>
+  </section>
+
+  <section>
+    <h2>05 / What this does not show</h2>
+    <div class="note">
+      <p><strong>No drift.</strong> Across 42 task-model pairs tested over seven paired batches, three came out below p&nbsp;=&nbsp;0.05 for a change in pass rate between batches. Chance alone produces about 2.1. The instrument for catching serving drift is in place &mdash; every turn records the served model and request id &mdash; but the corpus needs more nights before that question can be answered.</p>
+      <p><strong>No capability claim.</strong> Tasks were written and retired adversarially against these two models. Pass rates here describe the edge of what they can do, not what they can do in general.</p>
+      <p><strong>One day dominates.</strong> Two back-to-back batches on Sep 21&ndash;22 contribute about 73% of the paired episodes, so the pooled rates lean on one day's serving conditions. The per-batch analyses above do not.</p>
+    </div>
+  </section>
+
+  <footer>
+    <ul>
+      <li><span class="k">Dataset</span> <a href="https://huggingface.co/datasets/ArkFelix7/agentlens-failure-corpus">huggingface.co/datasets/ArkFelix7/agentlens-failure-corpus</a></li>
+      <li><span class="k">Code + traces</span> <a href="https://github.com/agentlens-sdk/agentlens-failure-corpus">github.com/agentlens-sdk/agentlens-failure-corpus</a></li>
+      <li><span class="k">Dashboard</span> <a href="https://agentlens-sdk.github.io/agentlens-failure-corpus/">agentlens-sdk.github.io/agentlens-failure-corpus</a></li>
+    </ul>
+    <p>Every figure on this page is regenerated from the released ledger by <code>paper/numbers.py</code>. Data CC-BY-4.0, code MIT.</p>
+  </footer>
+</div>
+
+<script>
+  var TASKS = [{"t":"retail_address_plus_capped_discount","f":"tools","s":75,"h":96,"sn":48,"hn":48},{"t":"hard_ttl_lru_cache","f":"coding","s":75,"h":92,"sn":263,"hn":263},{"t":"cal_no_double_book","f":"tools","s":80,"h":91,"sn":54,"hn":54},{"t":"air_hard_cancel_window_boundary","f":"tools","s":100,"h":95,"sn":41,"hn":41},{"t":"hard_semver_sort","f":"coding","s":100,"h":90,"sn":263,"hn":261},{"t":"cal_common_free_hour","f":"tools","s":97,"h":83,"sn":58,"hn":58},{"t":"stack_resolve_path","f":"coding","s":86,"h":66,"sn":263,"hn":264},{"t":"cal_hard_timezone_spill","f":"tools","s":55,"h":28,"sn":58,"hn":58},{"t":"hard_interval_subtract","f":"coding","s":98,"h":70,"sn":262,"hn":262},{"t":"stack_order_book","f":"coding","s":97,"h":67,"sn":257,"hn":257},{"t":"air_change_flexible","f":"tools","s":100,"h":68,"sn":53,"hn":53},{"t":"cal_spill_to_next_day","f":"tools","s":97,"h":61,"sn":62,"hn":62},{"t":"air_hard_rebook_latest_that_lands","f":"tools","s":100,"h":45,"sn":42,"hn":42},{"t":"cal_hard_three_way_two_hours","f":"tools","s":97,"h":41,"sn":61,"hn":61},{"t":"air_stack_disruption","f":"tools","s":88,"h":22,"sn":66,"hn":65},{"t":"refactor_string_join","f":"coding","s":67,"h":0,"sn":261,"hn":261},{"t":"retail_stack_ticket_queue","f":"tools","s":97,"h":24,"sn":58,"hn":58},{"t":"ops_hard_triage_all_open","f":"tools","s":100,"h":27,"sn":48,"hn":48},{"t":"hard_csv_strict","f":"coding","s":99,"h":2,"sn":266,"hn":266},{"t":"air_rebook_earliest_after_noon","f":"tools","s":100,"h":2,"sn":57,"hn":57},{"t":"cal_stack_week_planner","f":"tools","s":98,"h":0,"sn":41,"hn":41},{"t":"ops_stack_night_shift","f":"tools","s":100,"h":0,"sn":43,"hn":43}];
+
+  var MIXED = [
+    {model: "Sonnet 5", family: "tools", pct: 24, cells: 91, series: "s"},
+    {model: "Sonnet 5", family: "coding", pct: 51, cells: 49, series: "s"},
+    {model: "Haiku 4.5", family: "tools", pct: 58, cells: 91, series: "h"},
+    {model: "Haiku 4.5", family: "coding", pct: 67, cells: 49, series: "h"}
+  ];
+
+  (function scale() {
+    var el = document.getElementById("scale");
+    [0, 25, 50, 75, 100].forEach(function (v) {
+      var t = document.createElement("span");
+      t.className = "tick";
+      t.style.left = v + "%";
+      t.textContent = v + (v === 100 ? "%" : "");
+      el.appendChild(t);
+    });
+  })();
+
+  (function tasks() {
+    var host = document.getElementById("tasks");
+    TASKS.forEach(function (d) {
+      var lo = Math.min(d.s, d.h), hi = Math.max(d.s, d.h);
+      var row = document.createElement("div");
+      row.className = "row";
+      row.tabIndex = 0;
+      row.title = d.t + " (" + d.f + ")\nSonnet 5: " + d.s + "% of " + d.sn + " episodes"
+        + "\nHaiku 4.5: " + d.h + "% of " + d.hn + " episodes";
+      row.innerHTML =
+        '<div class="name">' + d.t + ' <em>' + d.f + '</em></div>' +
+        '<div class="track">' +
+          '<div class="link" style="left:' + lo + '%;width:' + (hi - lo) + '%"></div>' +
+          '<div class="pt h" style="left:' + d.h + '%"></div>' +
+          '<div class="pt s" style="left:' + d.s + '%"></div>' +
+        '</div>' +
+        '<div class="gap">' + (d.s - d.h > 0 ? "+" : "") + (d.s - d.h) + '</div>';
+      host.appendChild(row);
+    });
+  })();
+
+  (function mixed() {
+    var host = document.getElementById("mixed");
+    MIXED.forEach(function (d) {
+      var row = document.createElement("div");
+      row.className = "bar-row";
+      row.title = d.model + ", " + d.family + ": " + Math.round(d.pct * d.cells / 100)
+        + " of " + d.cells + " cells mixed";
+      row.innerHTML =
+        '<div class="name">' + d.model + ' <span style="color:var(--ink-3)">' + d.family + '</span></div>' +
+        '<div class="bar-lane">' +
+          '<div class="fill" style="width:' + d.pct + '%;background:var(--' + (d.series === "s" ? "sonnet" : "haiku") + ')"></div>' +
+          '<div class="val">' + d.pct + '%</div>' +
+        '</div>';
+      host.appendChild(row);
+    });
+  })();
+</script>
+
+</body>
+</html>

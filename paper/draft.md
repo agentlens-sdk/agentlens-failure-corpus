@@ -1,12 +1,14 @@
 # Same Prompt, Different Outcome: A Paired, Continuously Published Failure Corpus for Tool-Using Agents
 
+**ArkFelix7** · aivialabs@gmail.com · https://github.com/agentlens-sdk/agentlens-failure-corpus
+
 *Draft, 2026-09-22. Data frozen after the 2026-09-22 08:07Z run. Every number below comes from
 `paper/numbers.md`, which `paper/numbers.py` regenerates from the ledger. Do not edit a number by hand.*
 
 ## Abstract
 
-We release a corpus of agent episodes: two Claude models, the same 22 tasks, run each night by an unattended
-harness. Each episode's full trace is published in an open span format, and every failure carries a label
+We release a corpus of 5,647 agent episodes: two Claude models, the same 22 tasks, run over eight unattended
+batches between 2026-09-07 and 2026-09-22. Each episode's full trace is published in an open span format, and every failure carries a label
 from a fixed taxonomy. Every task is scored by a deterministic state or equality checker, with no LLM judge,
 so a change in outcome can only come from the model or the serving stack, never the benchmark. Tasks are run
 in pairs across models and repeatedly within a night. This makes two questions answerable that single-shot
@@ -97,16 +99,24 @@ the audit because a cheaper labeler would have changed the headline failure dist
 
 ## 4. Results
 
-*Paired runs only (both models queued); nightly episodes with at least one turn.*
+*Paired runs only, meaning runs in which both models were queued: seven runs, 5,248 episodes. Episodes that
+ended in a harness or network error, and the eight that were running when the 2026-09-22 freeze began
+(Section 5), are excluded.*
 
 ### 4.1 The two models
 
-| model | family | n | pass rate [95% CI] | USD / episode |
-|---|---|---|---|---|
-| Sonnet 5 | tools | 790 | 91.6% [89.5, 93.4] | 0.070 |
-| Sonnet 5 | coding | 1835 | 88.8% [87.3, 90.2] | 0.032 |
-| Haiku 4.5 | tools | 789 | 45.4% [41.9, 48.9] | 0.021 |
-| Haiku 4.5 | coding | 1834 | 55.0% [52.7, 57.3] | 0.006 |
+| model | family | n | pass rate [95% CI] | USD / episode | USD / passing episode |
+|---|---|---|---|---|---|
+| Sonnet 5 | tools | 790 | 91.6% [89.5, 93.4] | 0.070 | 0.076 |
+| Sonnet 5 | coding | 1835 | 88.8% [87.3, 90.2] | 0.032 | 0.036 |
+| Haiku 4.5 | tools | 789 | 45.4% [41.9, 48.9] | 0.021 | 0.047 |
+| Haiku 4.5 | coding | 1834 | 55.0% [52.7, 57.3] | 0.006 | 0.011 |
+
+The last column divides total spend by the number of *passing* episodes, which is what a retry-until-success
+caller pays. Even at less than half the pass rate, Haiku 4.5 is the cheaper route to a passing episode on both
+families: $0.047 against $0.076 on tools, $0.011 against $0.036 on coding. That arithmetic only holds where
+a checker can tell a pass from a failure and a retry is acceptable. On the five tasks where Haiku passes
+almost never, no number of retries helps, and its expected cost is unbounded.
 
 Sonnet 5's rate is higher on 19 of 22 tasks and Haiku 4.5's on 3 (exact sign test p = 0.00086). The gaps
 are extreme and concentrated in specific tasks. Haiku passes 0 of 43 attempts at `ops_stack_night_shift`, 0 of
@@ -152,8 +162,10 @@ each trace). Crashes are rare, and 34 of the 35 are Haiku's.
 ## 5. Release
 
 - **Traces:** one JSON file per episode under `data/traces/<family>/`, `agentlens/v1` envelope, ULID ids,
-  ISO-8601 UTC timestamps. Zero-turn episodes (network failures before the first model call) are kept in the
-  data but excluded from all analysis.
+  ISO-8601 UTC timestamps. Episodes that never reached the model (zero turns) or ended in a harness error are
+  kept in the data and excluded from every analysis here, as are episodes that were in flight when the harness
+  was frozen by hand on 2026-09-22 (01:07–03:44Z, to survive a network outage); `paper/numbers.py` names that
+  window explicitly.
 - **Ledger:** `data/ledger.sqlite`. Every API call with its token counts and cost, every episode with outcome,
   label, evidence and `run_kind` (`nightly`, `calibration`, `aborted`).
 - **Dashboard:** https://agentlens-sdk.github.io/agentlens-failure-corpus/
