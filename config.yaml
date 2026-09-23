@@ -40,6 +40,8 @@ families:
   tools:
     weight: 0.30
     enabled: true
+    control_sample: 3            # retired tasks queued nightly as the selection control (see plan())
+    control_repeats: 3
     retired: [
       air_bag_free_gold, air_bag_limit, air_bag_paid_silver, air_cancel_airline_cancelled_free,
       air_cancel_basic_within_24h, air_change_basic_refuses, air_upgrade_basic_refuses, air_upgrade_ok,
@@ -62,6 +64,8 @@ families:
   flakiness:
     weight: 0.30
     enabled: true
+    control_sample: 3
+    control_repeats: 3
     repeats: 5                   # throttle raises repeats to hit budget
     retired: [
       balanced_brackets, binary_search, compress_ranges, dedupe_preserve_order, fix_char_counter,

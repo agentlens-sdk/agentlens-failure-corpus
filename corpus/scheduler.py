@@ -71,6 +71,14 @@ def plan(budget):
             picks += [t for t in tasks for _ in range(reps)]
         else:
             picks += [random.choice(tasks) for _ in range(count)]
+        # Control tier: a few retired (saturated) tasks, queued on purpose. Retirement selects the active
+        # set for tasks whose pass rates sit away from the extremes, which is where a repeated task produces
+        # mixed results anyway, so without a control the within-night variation cannot be told apart from
+        # that selection. Each control task is queued control_repeats times so its cell can be mixed at all.
+        n_ctl, reps_ctl = f.get("control_sample", 0), f.get("control_repeats", 3)
+        if n_ctl and retired:
+            pool = [t for t in load_family(name) if t.task_id in retired]
+            picks += [t for t in random.sample(pool, min(n_ctl, len(pool))) for _ in range(reps_ctl)]
     random.shuffle(picks); return [(t, m) for t in picks for m in models]
 
 def main():
