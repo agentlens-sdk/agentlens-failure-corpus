@@ -133,7 +133,7 @@ def main():
     expect(labeler.read_label(Reply([Block("text", good)], stop_reason="refusal"))[0] == "unclassified", "a refusal carries no label")
 
     # a failed status check while the batch runs is retried, not fatal (2026-09-16 and 2026-09-18)
-    import httpx
+    import httpx2  # the anthropic SDK's transport; plain httpx is not a dependency of ours
 
     class Result:
         def __init__(self, custom_id):
@@ -152,7 +152,7 @@ def main():
         def retrieve(self, batch_id):
             self.checks += 1
             if self.checks == 1:
-                raise labeler.anthropic.APIConnectionError(request=httpx.Request("GET", "https://api.anthropic.com"))
+                raise labeler.anthropic.APIConnectionError(request=httpx2.Request("GET", "https://api.anthropic.com"))
             return type("S", (), {"processing_status": "ended"})()
 
         def results(self, batch_id):
