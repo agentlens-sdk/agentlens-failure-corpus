@@ -1,6 +1,6 @@
 {
- "spent_total": 218.76,
- "episodes": 8350,
+ "spent_total": 237.93,
+ "episodes": 9082,
  "by_run_kind": [
   {
    "run_kind": "aborted",
@@ -12,43 +12,43 @@
   },
   {
    "run_kind": "nightly",
-   "n": 7461
+   "n": 8193
   }
  ],
  "by_family": [
   {
    "family": "flakiness",
-   "n": 5146,
-   "pass_rate": 0.7310532452390206,
-   "avg_cost": 0.017581386902448502
+   "n": 5660,
+   "pass_rate": 0.7326855123674911,
+   "avg_cost": 0.01744814964664311
   },
   {
    "family": "tools",
-   "n": 2315,
-   "pass_rate": 0.714902807775378,
-   "avg_cost": 0.042653009330453566
+   "n": 2533,
+   "pass_rate": 0.7141729174891434,
+   "avg_cost": 0.04284493085274378
   }
  ],
  "labels": [
   {
    "label": "wrong_output",
-   "n": 1326
+   "n": 1451
   },
   {
    "label": "misread_spec",
-   "n": 477
+   "n": 525
   },
   {
    "label": "premature_stop",
-   "n": 127
+   "n": 138
   },
   {
    "label": "tool_misuse",
-   "n": 52
+   "n": 57
   },
   {
    "label": "crashed",
-   "n": 50
+   "n": 54
   },
   {
    "label": "unclassified",
@@ -150,10 +150,10 @@
   },
   {
    "date": "2026-09-28",
-   "budget": 10.0,
-   "spent": 10.0843947,
-   "episodes": 418,
-   "valid": 418,
+   "budget": 28.0,
+   "spent": 29.26078795,
+   "episodes": 1150,
+   "valid": 1150,
    "pushed": 0
   }
  ],
@@ -161,186 +161,186 @@
   {
    "task_id": "refactor_string_join",
    "family": "flakiness",
-   "n": 685,
-   "pass_rate": 0.3197080291970803,
-   "avg_turns": 1.9970802919708028,
-   "avg_cost": 0.00832871094890511
+   "n": 747,
+   "pass_rate": 0.32262382864792505,
+   "avg_turns": 1.997322623828648,
+   "avg_cost": 0.00828479518072289
   },
   {
    "task_id": "cal_hard_timezone_spill",
    "family": "tools",
-   "n": 150,
-   "pass_rate": 0.41333333333333333,
-   "avg_turns": 4.64,
-   "avg_cost": 0.013032581
+   "n": 156,
+   "pass_rate": 0.4166666666666667,
+   "avg_turns": 4.653846153846154,
+   "avg_cost": 0.013108796474358976
   },
   {
    "task_id": "cal_stack_week_planner",
    "family": "tools",
-   "n": 124,
-   "pass_rate": 0.49193548387096775,
-   "avg_turns": 7.588709677419355,
-   "avg_cost": 0.11005485080645162
+   "n": 138,
+   "pass_rate": 0.4927536231884058,
+   "avg_turns": 7.478260869565218,
+   "avg_cost": 0.10958103985507246
   },
   {
    "task_id": "ops_stack_night_shift",
    "family": "tools",
-   "n": 112,
+   "n": 130,
    "pass_rate": 0.5,
-   "avg_turns": 7.455357142857143,
-   "avg_cost": 0.11248243035714287
+   "avg_turns": 7.392307692307693,
+   "avg_cost": 0.11214642269230769
   },
   {
    "task_id": "hard_csv_strict",
    "family": "flakiness",
-   "n": 686,
-   "pass_rate": 0.5014577259475219,
-   "avg_turns": 2.001457725947522,
-   "avg_cost": 0.01978848979591837
+   "n": 748,
+   "pass_rate": 0.5040106951871658,
+   "avg_turns": 2.001336898395722,
+   "avg_cost": 0.019186870320855615
   },
   {
    "task_id": "air_rebook_earliest_after_noon",
    "family": "tools",
-   "n": 166,
-   "pass_rate": 0.5180722891566265,
-   "avg_turns": 3.5843373493975905,
-   "avg_cost": 0.012838465662650601
+   "n": 188,
+   "pass_rate": 0.5159574468085106,
+   "avg_turns": 3.574468085106383,
+   "avg_cost": 0.012727313297872338
   },
   {
    "task_id": "air_stack_disruption",
    "family": "tools",
-   "n": 174,
-   "pass_rate": 0.5632183908045977,
-   "avg_turns": 5.741379310344827,
-   "avg_cost": 0.058540431896551726
+   "n": 192,
+   "pass_rate": 0.5572916666666666,
+   "avg_turns": 5.770833333333333,
+   "avg_cost": 0.058543110937500004
   },
   {
    "task_id": "retail_stack_ticket_queue",
    "family": "tools",
-   "n": 146,
-   "pass_rate": 0.6164383561643836,
-   "avg_turns": 11.986301369863014,
-   "avg_cost": 0.16643264931506851
+   "n": 160,
+   "pass_rate": 0.61875,
+   "avg_turns": 12.0,
+   "avg_cost": 0.1665523475
   },
   {
    "task_id": "ops_hard_triage_all_open",
    "family": "tools",
-   "n": 126,
-   "pass_rate": 0.626984126984127,
-   "avg_turns": 6.079365079365079,
-   "avg_cost": 0.08074189484126984
+   "n": 134,
+   "pass_rate": 0.6268656716417911,
+   "avg_turns": 6.074626865671642,
+   "avg_cost": 0.08079076119402985
   },
   {
    "task_id": "cal_hard_three_way_two_hours",
    "family": "tools",
-   "n": 164,
-   "pass_rate": 0.676829268292683,
-   "avg_turns": 4.4573170731707314,
-   "avg_cost": 0.03144155487804878
+   "n": 172,
+   "pass_rate": 0.6744186046511628,
+   "avg_turns": 4.465116279069767,
+   "avg_cost": 0.03159773197674419
   },
   {
    "task_id": "air_hard_rebook_latest_that_lands",
    "family": "tools",
-   "n": 118,
-   "pass_rate": 0.7033898305084746,
-   "avg_turns": 4.11864406779661,
-   "avg_cost": 0.018356877966101692
+   "n": 130,
+   "pass_rate": 0.7,
+   "avg_turns": 4.123076923076923,
+   "avg_cost": 0.018389124615384615
   },
   {
    "task_id": "stack_resolve_path",
    "family": "flakiness",
-   "n": 682,
-   "pass_rate": 0.7624633431085044,
-   "avg_turns": 2.06158357771261,
-   "avg_cost": 0.02038435337243402
-  },
-  {
-   "task_id": "cal_spill_to_next_day",
-   "family": "tools",
-   "n": 161,
-   "pass_rate": 0.8074534161490683,
-   "avg_turns": 4.813664596273292,
-   "avg_cost": 0.01807768944099379
+   "n": 744,
+   "pass_rate": 0.7594086021505376,
+   "avg_turns": 2.067204301075269,
+   "avg_cost": 0.02038662365591398
   },
   {
    "task_id": "stack_order_book",
    "family": "flakiness",
-   "n": 668,
-   "pass_rate": 0.8098802395209581,
-   "avg_turns": 2.0224550898203595,
-   "avg_cost": 0.032544375748502996
+   "n": 730,
+   "pass_rate": 0.810958904109589,
+   "avg_turns": 2.0342465753424657,
+   "avg_cost": 0.03230331369863014
   },
   {
    "task_id": "hard_ttl_lru_cache",
    "family": "flakiness",
-   "n": 680,
-   "pass_rate": 0.8176470588235294,
-   "avg_turns": 2.0176470588235293,
-   "avg_cost": 0.015261242647058823
+   "n": 742,
+   "pass_rate": 0.8113207547169812,
+   "avg_turns": 2.0175202156334233,
+   "avg_cost": 0.015128956873315363
+  },
+  {
+   "task_id": "cal_spill_to_next_day",
+   "family": "tools",
+   "n": 177,
+   "pass_rate": 0.8135593220338984,
+   "avg_turns": 4.80225988700565,
+   "avg_cost": 0.018051994350282485
   },
   {
    "task_id": "hard_interval_subtract",
    "family": "flakiness",
-   "n": 678,
-   "pass_rate": 0.831858407079646,
+   "n": 740,
+   "pass_rate": 0.8297297297297297,
    "avg_turns": 2.0,
-   "avg_cost": 0.01964462389380531
-  },
-  {
-   "task_id": "air_change_flexible",
-   "family": "tools",
-   "n": 137,
-   "pass_rate": 0.8613138686131386,
-   "avg_turns": 3.875912408759124,
-   "avg_cost": 0.013076702189781022
+   "avg_cost": 0.019751913513513512
   },
   {
    "task_id": "cal_no_double_book",
    "family": "tools",
-   "n": 130,
-   "pass_rate": 0.8615384615384616,
-   "avg_turns": 3.769230769230769,
-   "avg_cost": 0.01287426923076923
+   "n": 148,
+   "pass_rate": 0.8513513513513513,
+   "avg_turns": 3.7635135135135136,
+   "avg_cost": 0.012825695945945946
+  },
+  {
+   "task_id": "air_change_flexible",
+   "family": "tools",
+   "n": 155,
+   "pass_rate": 0.8516129032258064,
+   "avg_turns": 3.8774193548387097,
+   "avg_cost": 0.013027965806451613
   },
   {
    "task_id": "cal_common_free_hour",
    "family": "tools",
-   "n": 144,
-   "pass_rate": 0.8680555555555556,
-   "avg_turns": 3.7708333333333335,
-   "avg_cost": 0.01683236111111111
+   "n": 160,
+   "pass_rate": 0.88125,
+   "avg_turns": 3.7875,
+   "avg_cost": 0.016833862499999998
   },
   {
    "task_id": "retail_address_plus_capped_discount",
    "family": "tools",
-   "n": 134,
-   "pass_rate": 0.8805970149253731,
-   "avg_turns": 3.8358208955223883,
-   "avg_cost": 0.0172609
+   "n": 142,
+   "pass_rate": 0.8873239436619719,
+   "avg_turns": 3.8309859154929575,
+   "avg_cost": 0.017196645070422536
   },
   {
    "task_id": "hard_semver_sort",
    "family": "flakiness",
-   "n": 680,
-   "pass_rate": 0.9352941176470588,
+   "n": 742,
+   "pass_rate": 0.9380053908355795,
    "avg_turns": 2.0,
-   "avg_cost": 0.012754588235294118
+   "avg_cost": 0.012613533692722372
   },
   {
    "task_id": "hard_calc_truncating",
    "family": "flakiness",
-   "n": 122,
-   "pass_rate": 0.9590163934426229,
+   "n": 184,
+   "pass_rate": 0.9619565217391305,
    "avg_turns": 2.0,
-   "avg_cost": 0.013256336065573771
+   "avg_cost": 0.013206635869565218
   },
   {
    "task_id": "air_hard_cancel_window_boundary",
    "family": "tools",
-   "n": 120,
-   "pass_rate": 0.975,
+   "n": 124,
+   "pass_rate": 0.9758064516129032,
    "avg_turns": 3.75,
-   "avg_cost": 0.017195056666666667
+   "avg_cost": 0.017223279838709676
   },
   {
    "task_id": "longest_common_prefix",
@@ -349,6 +349,22 @@
    "pass_rate": 1.0,
    "avg_turns": 2.0,
    "avg_cost": 0.00490025
+  },
+  {
+   "task_id": "fix_chunk_tail",
+   "family": "flakiness",
+   "n": 23,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.00482595652173913
+  },
+  {
+   "task_id": "flatten_nested",
+   "family": "flakiness",
+   "n": 23,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.004373347826086956
   },
   {
    "task_id": "compress_ranges",
@@ -367,28 +383,12 @@
    "avg_cost": 0.0051945
   },
   {
-   "task_id": "fix_chunk_tail",
-   "family": "flakiness",
-   "n": 17,
-   "pass_rate": 1.0,
-   "avg_turns": 2.0,
-   "avg_cost": 0.005028882352941176
-  },
-  {
    "task_id": "fix_mutable_default",
    "family": "flakiness",
    "n": 17,
    "pass_rate": 1.0,
    "avg_turns": 2.0,
    "avg_cost": 0.0051303529411764704
-  },
-  {
-   "task_id": "flatten_nested",
-   "family": "flakiness",
-   "n": 17,
-   "pass_rate": 1.0,
-   "avg_turns": 2.0,
-   "avg_cost": 0.004654411764705883
   },
   {
    "task_id": "merge_intervals",
@@ -527,12 +527,28 @@
    "avg_cost": 0.008431
   },
   {
+   "task_id": "retail_discount_gold_max",
+   "family": "tools",
+   "n": 10,
+   "pass_rate": 1.0,
+   "avg_turns": 4.0,
+   "avg_cost": 0.013766239999999999
+  },
+  {
    "task_id": "retail_exchange_out_of_stock",
    "family": "tools",
    "n": 10,
    "pass_rate": 1.0,
    "avg_turns": 3.0,
    "avg_cost": 0.0105644
+  },
+  {
+   "task_id": "retail_refund_line",
+   "family": "tools",
+   "n": 10,
+   "pass_rate": 1.0,
+   "avg_turns": 3.7,
+   "avg_cost": 0.01199238
   },
   {
    "task_id": "cal_reschedule_conflict",
@@ -573,6 +589,14 @@
    "pass_rate": 1.0,
    "avg_turns": 4.0,
    "avg_cost": 0.012342075
+  },
+  {
+   "task_id": "ops_rollback_bad_deploy",
+   "family": "tools",
+   "n": 6,
+   "pass_rate": 1.0,
+   "avg_turns": 3.5,
+   "avg_cost": 0.012305083333333333
   },
   {
    "task_id": "ops_status_internal_refuses",
@@ -631,6 +655,14 @@
    "avg_cost": 0.0254065
   },
   {
+   "task_id": "stack_recurrence",
+   "family": "flakiness",
+   "n": 6,
+   "pass_rate": 1.0,
+   "avg_turns": 2.0,
+   "avg_cost": 0.0372875
+  },
+  {
    "task_id": "air_bag_free_gold",
    "family": "tools",
    "n": 5,
@@ -671,14 +703,6 @@
    "avg_cost": 0.0194205
   },
   {
-   "task_id": "retail_discount_gold_max",
-   "family": "tools",
-   "n": 4,
-   "pass_rate": 1.0,
-   "avg_turns": 4.0,
-   "avg_cost": 0.015640499999999998
-  },
-  {
    "task_id": "retail_missing_order",
    "family": "tools",
    "n": 4,
@@ -701,14 +725,6 @@
    "pass_rate": 1.0,
    "avg_turns": 3.0,
    "avg_cost": 0.0128712
-  },
-  {
-   "task_id": "retail_refund_line",
-   "family": "tools",
-   "n": 4,
-   "pass_rate": 1.0,
-   "avg_turns": 4.0,
-   "avg_cost": 0.014763749999999999
   },
   {
    "task_id": "retail_refund_pending_is_cancel",
@@ -823,7 +839,7 @@
    "avg_cost": 0.0142176
   }
  ],
- "task_count": 83,
+ "task_count": 85,
  "flakiness": [
   {
    "week": "2026-36",
@@ -1069,91 +1085,97 @@
    "week": "2026-39",
    "task_id": "fix_chunk_tail",
    "pass_rate": 1.0,
-   "n": 6
+   "n": 12
   },
   {
    "week": "2026-39",
    "task_id": "flatten_nested",
    "pass_rate": 1.0,
-   "n": 6
+   "n": 12
   },
   {
    "week": "2026-39",
    "task_id": "hard_calc_truncating",
-   "pass_rate": 0.9411764705882353,
-   "n": 34
+   "pass_rate": 0.9583333333333334,
+   "n": 96
   },
   {
    "week": "2026-39",
    "task_id": "hard_csv_strict",
-   "pass_rate": 0.5,
-   "n": 34
+   "pass_rate": 0.5208333333333334,
+   "n": 96
   },
   {
    "week": "2026-39",
    "task_id": "hard_interval_subtract",
-   "pass_rate": 0.7647058823529411,
-   "n": 34
+   "pass_rate": 0.7916666666666666,
+   "n": 96
   },
   {
    "week": "2026-39",
    "task_id": "hard_semver_sort",
-   "pass_rate": 0.8529411764705882,
-   "n": 34
+   "pass_rate": 0.9270833333333334,
+   "n": 96
   },
   {
    "week": "2026-39",
    "task_id": "hard_ttl_lru_cache",
-   "pass_rate": 0.8529411764705882,
-   "n": 34
+   "pass_rate": 0.78125,
+   "n": 96
   },
   {
    "week": "2026-39",
    "task_id": "refactor_string_join",
-   "pass_rate": 0.4117647058823529,
-   "n": 34
+   "pass_rate": 0.375,
+   "n": 96
   },
   {
    "week": "2026-39",
    "task_id": "stack_order_book",
-   "pass_rate": 0.6764705882352942,
-   "n": 34
+   "pass_rate": 0.7708333333333334,
+   "n": 96
+  },
+  {
+   "week": "2026-39",
+   "task_id": "stack_recurrence",
+   "pass_rate": 1.0,
+   "n": 6
   },
   {
    "week": "2026-39",
    "task_id": "stack_resolve_path",
-   "pass_rate": 0.7647058823529411,
-   "n": 34
+   "pass_rate": 0.7395833333333334,
+   "n": 96
   }
  ],
  "by_model": [
   {
    "model": "claude-haiku-4-5-20251001",
    "family": "flakiness",
-   "n": 2461,
-   "pass_rate": 0.5656237301909792,
-   "avg_cost": 0.0058449520520113775
+   "n": 2718,
+   "pass_rate": 0.5713760117733627,
+   "avg_cost": 0.0058780279617365715
   },
   {
    "model": "claude-haiku-4-5-20251001",
    "family": "tools",
-   "n": 1070,
-   "pass_rate": 0.46074766355140184,
-   "avg_cost": 0.02082081401869159
+   "n": 1179,
+   "pass_rate": 0.45971162001696353,
+   "avg_cost": 0.020756904156064463
   },
   {
    "model": "claude-sonnet-5",
    "family": "flakiness",
-   "n": 2685,
-   "pass_rate": 0.88268156424581,
-   "avg_cost": 0.028338692737430164
+   "n": 2942,
+   "pass_rate": 0.8817131203263087,
+   "avg_cost": 0.02813733752549286
   },
   {
    "model": "claude-sonnet-5",
    "family": "tools",
-   "n": 1245,
-   "pass_rate": 0.9333333333333333,
-   "avg_cost": 0.0614164221686747
+   "n": 1354,
+   "pass_rate": 0.9357459379615952,
+   "avg_cost": 0.062078153508124075
   }
  ],
  "tasks_by_model": [
@@ -1196,62 +1218,62 @@
   {
    "task_id": "air_change_flexible",
    "model": "claude-haiku-4-5-20251001",
-   "n": 68,
-   "pass_rate": 0.7205882352941176
+   "n": 77,
+   "pass_rate": 0.7012987012987013
   },
   {
    "task_id": "air_change_flexible",
    "model": "claude-sonnet-5",
-   "n": 69,
+   "n": 78,
    "pass_rate": 1.0
   },
   {
    "task_id": "air_hard_cancel_window_boundary",
    "model": "claude-haiku-4-5-20251001",
-   "n": 60,
-   "pass_rate": 0.95
+   "n": 62,
+   "pass_rate": 0.9516129032258065
   },
   {
    "task_id": "air_hard_cancel_window_boundary",
    "model": "claude-sonnet-5",
-   "n": 60,
+   "n": 62,
    "pass_rate": 1.0
   },
   {
    "task_id": "air_hard_rebook_latest_that_lands",
    "model": "claude-haiku-4-5-20251001",
-   "n": 59,
-   "pass_rate": 0.423728813559322
+   "n": 65,
+   "pass_rate": 0.4153846153846154
   },
   {
    "task_id": "air_hard_rebook_latest_that_lands",
    "model": "claude-sonnet-5",
-   "n": 59,
-   "pass_rate": 0.9830508474576272
+   "n": 65,
+   "pass_rate": 0.9846153846153847
   },
   {
    "task_id": "air_rebook_earliest_after_noon",
    "model": "claude-haiku-4-5-20251001",
-   "n": 81,
-   "pass_rate": 0.012345679012345678
+   "n": 92,
+   "pass_rate": 0.010869565217391304
   },
   {
    "task_id": "air_rebook_earliest_after_noon",
    "model": "claude-sonnet-5",
-   "n": 85,
+   "n": 96,
    "pass_rate": 1.0
   },
   {
    "task_id": "air_stack_disruption",
    "model": "claude-haiku-4-5-20251001",
-   "n": 87,
-   "pass_rate": 0.21839080459770116
+   "n": 96,
+   "pass_rate": 0.20833333333333334
   },
   {
    "task_id": "air_stack_disruption",
    "model": "claude-sonnet-5",
-   "n": 87,
-   "pass_rate": 0.9080459770114943
+   "n": 96,
+   "pass_rate": 0.90625
   },
   {
    "task_id": "air_upgrade_basic_refuses",
@@ -1286,38 +1308,38 @@
   {
    "task_id": "cal_common_free_hour",
    "model": "claude-haiku-4-5-20251001",
-   "n": 71,
-   "pass_rate": 0.7887323943661971
+   "n": 79,
+   "pass_rate": 0.810126582278481
   },
   {
    "task_id": "cal_common_free_hour",
    "model": "claude-sonnet-5",
-   "n": 73,
-   "pass_rate": 0.9452054794520548
+   "n": 81,
+   "pass_rate": 0.9506172839506173
   },
   {
    "task_id": "cal_hard_three_way_two_hours",
    "model": "claude-haiku-4-5-20251001",
-   "n": 82,
-   "pass_rate": 0.3902439024390244
+   "n": 86,
+   "pass_rate": 0.38372093023255816
   },
   {
    "task_id": "cal_hard_three_way_two_hours",
    "model": "claude-sonnet-5",
-   "n": 82,
-   "pass_rate": 0.9634146341463414
+   "n": 86,
+   "pass_rate": 0.9651162790697675
   },
   {
    "task_id": "cal_hard_timezone_spill",
    "model": "claude-haiku-4-5-20251001",
-   "n": 75,
-   "pass_rate": 0.29333333333333333
+   "n": 78,
+   "pass_rate": 0.2948717948717949
   },
   {
    "task_id": "cal_hard_timezone_spill",
    "model": "claude-sonnet-5",
-   "n": 75,
-   "pass_rate": 0.5333333333333333
+   "n": 78,
+   "pass_rate": 0.5384615384615384
   },
   {
    "task_id": "cal_move_across_days",
@@ -1328,14 +1350,14 @@
   {
    "task_id": "cal_no_double_book",
    "model": "claude-haiku-4-5-20251001",
-   "n": 63,
-   "pass_rate": 0.9206349206349206
+   "n": 72,
+   "pass_rate": 0.9027777777777778
   },
   {
    "task_id": "cal_no_double_book",
    "model": "claude-sonnet-5",
-   "n": 67,
-   "pass_rate": 0.8059701492537313
+   "n": 76,
+   "pass_rate": 0.8026315789473685
   },
   {
    "task_id": "cal_reschedule_conflict",
@@ -1352,26 +1374,26 @@
   {
    "task_id": "cal_spill_to_next_day",
    "model": "claude-haiku-4-5-20251001",
-   "n": 79,
-   "pass_rate": 0.6329113924050633
+   "n": 87,
+   "pass_rate": 0.6436781609195402
   },
   {
    "task_id": "cal_spill_to_next_day",
    "model": "claude-sonnet-5",
-   "n": 82,
-   "pass_rate": 0.975609756097561
+   "n": 90,
+   "pass_rate": 0.9777777777777777
   },
   {
    "task_id": "cal_stack_week_planner",
    "model": "claude-haiku-4-5-20251001",
-   "n": 62,
+   "n": 69,
    "pass_rate": 0.0
   },
   {
    "task_id": "cal_stack_week_planner",
    "model": "claude-sonnet-5",
-   "n": 62,
-   "pass_rate": 0.9838709677419355
+   "n": 69,
+   "pass_rate": 0.9855072463768116
   },
   {
    "task_id": "compress_ranges",
@@ -1406,13 +1428,13 @@
   {
    "task_id": "fix_chunk_tail",
    "model": "claude-haiku-4-5-20251001",
-   "n": 3,
+   "n": 6,
    "pass_rate": 1.0
   },
   {
    "task_id": "fix_chunk_tail",
    "model": "claude-sonnet-5",
-   "n": 14,
+   "n": 17,
    "pass_rate": 1.0
   },
   {
@@ -1436,74 +1458,74 @@
   {
    "task_id": "flatten_nested",
    "model": "claude-haiku-4-5-20251001",
-   "n": 3,
+   "n": 6,
    "pass_rate": 1.0
   },
   {
    "task_id": "flatten_nested",
    "model": "claude-sonnet-5",
-   "n": 14,
+   "n": 17,
    "pass_rate": 1.0
   },
   {
    "task_id": "hard_calc_truncating",
    "model": "claude-haiku-4-5-20251001",
-   "n": 61,
-   "pass_rate": 0.9180327868852459
+   "n": 92,
+   "pass_rate": 0.9239130434782609
   },
   {
    "task_id": "hard_calc_truncating",
    "model": "claude-sonnet-5",
-   "n": 61,
+   "n": 92,
    "pass_rate": 1.0
   },
   {
    "task_id": "hard_csv_strict",
    "model": "claude-haiku-4-5-20251001",
-   "n": 343,
-   "pass_rate": 0.011661807580174927
+   "n": 374,
+   "pass_rate": 0.016042780748663103
   },
   {
    "task_id": "hard_csv_strict",
    "model": "claude-sonnet-5",
-   "n": 343,
-   "pass_rate": 0.9912536443148688
+   "n": 374,
+   "pass_rate": 0.9919786096256684
   },
   {
    "task_id": "hard_interval_subtract",
    "model": "claude-haiku-4-5-20251001",
-   "n": 339,
-   "pass_rate": 0.6873156342182891
+   "n": 370,
+   "pass_rate": 0.6810810810810811
   },
   {
    "task_id": "hard_interval_subtract",
    "model": "claude-sonnet-5",
-   "n": 339,
-   "pass_rate": 0.976401179941003
+   "n": 370,
+   "pass_rate": 0.9783783783783784
   },
   {
    "task_id": "hard_semver_sort",
    "model": "claude-haiku-4-5-20251001",
-   "n": 340,
-   "pass_rate": 0.9058823529411765
+   "n": 371,
+   "pass_rate": 0.9137466307277629
   },
   {
    "task_id": "hard_semver_sort",
    "model": "claude-sonnet-5",
-   "n": 340,
-   "pass_rate": 0.9647058823529412
+   "n": 371,
+   "pass_rate": 0.9622641509433962
   },
   {
    "task_id": "hard_ttl_lru_cache",
    "model": "claude-haiku-4-5-20251001",
-   "n": 340,
-   "pass_rate": 0.9205882352941176
+   "n": 371,
+   "pass_rate": 0.9245283018867925
   },
   {
    "task_id": "hard_ttl_lru_cache",
    "model": "claude-sonnet-5",
-   "n": 340,
-   "pass_rate": 0.7147058823529412
+   "n": 371,
+   "pass_rate": 0.6981132075471698
   },
   {
    "task_id": "int_to_roman",
@@ -1556,13 +1578,13 @@
   {
    "task_id": "ops_hard_triage_all_open",
    "model": "claude-haiku-4-5-20251001",
-   "n": 63,
-   "pass_rate": 0.25396825396825395
+   "n": 67,
+   "pass_rate": 0.2537313432835821
   },
   {
    "task_id": "ops_hard_triage_all_open",
    "model": "claude-sonnet-5",
-   "n": 63,
+   "n": 67,
    "pass_rate": 1.0
   },
   {
@@ -1584,6 +1606,18 @@
    "pass_rate": 1.0
   },
   {
+   "task_id": "ops_rollback_bad_deploy",
+   "model": "claude-haiku-4-5-20251001",
+   "n": 3,
+   "pass_rate": 1.0
+  },
+  {
+   "task_id": "ops_rollback_bad_deploy",
+   "model": "claude-sonnet-5",
+   "n": 3,
+   "pass_rate": 1.0
+  },
+  {
    "task_id": "ops_rollback_right_service",
    "model": "claude-haiku-4-5-20251001",
    "n": 3,
@@ -1598,13 +1632,13 @@
   {
    "task_id": "ops_stack_night_shift",
    "model": "claude-haiku-4-5-20251001",
-   "n": 56,
+   "n": 65,
    "pass_rate": 0.0
   },
   {
    "task_id": "ops_stack_night_shift",
    "model": "claude-sonnet-5",
-   "n": 56,
+   "n": 65,
    "pass_rate": 1.0
   },
   {
@@ -1634,14 +1668,14 @@
   {
    "task_id": "refactor_string_join",
    "model": "claude-haiku-4-5-20251001",
-   "n": 339,
+   "n": 370,
    "pass_rate": 0.0
   },
   {
    "task_id": "refactor_string_join",
    "model": "claude-sonnet-5",
-   "n": 346,
-   "pass_rate": 0.6329479768786127
+   "n": 377,
+   "pass_rate": 0.6392572944297082
   },
   {
    "task_id": "retail_address_change_pending",
@@ -1658,14 +1692,14 @@
   {
    "task_id": "retail_address_plus_capped_discount",
    "model": "claude-haiku-4-5-20251001",
-   "n": 64,
-   "pass_rate": 0.96875
+   "n": 68,
+   "pass_rate": 0.9705882352941176
   },
   {
    "task_id": "retail_address_plus_capped_discount",
    "model": "claude-sonnet-5",
-   "n": 70,
-   "pass_rate": 0.8
+   "n": 74,
+   "pass_rate": 0.8108108108108109
   },
   {
    "task_id": "retail_cancel_pending",
@@ -1711,8 +1745,14 @@
   },
   {
    "task_id": "retail_discount_gold_max",
+   "model": "claude-haiku-4-5-20251001",
+   "n": 3,
+   "pass_rate": 1.0
+  },
+  {
+   "task_id": "retail_discount_gold_max",
    "model": "claude-sonnet-5",
-   "n": 4,
+   "n": 7,
    "pass_rate": 1.0
   },
   {
@@ -1807,8 +1847,14 @@
   },
   {
    "task_id": "retail_refund_line",
+   "model": "claude-haiku-4-5-20251001",
+   "n": 3,
+   "pass_rate": 1.0
+  },
+  {
+   "task_id": "retail_refund_line",
    "model": "claude-sonnet-5",
-   "n": 4,
+   "n": 7,
    "pass_rate": 1.0
   },
   {
@@ -1820,14 +1866,14 @@
   {
    "task_id": "retail_stack_ticket_queue",
    "model": "claude-haiku-4-5-20251001",
-   "n": 73,
-   "pass_rate": 0.2602739726027397
+   "n": 80,
+   "pass_rate": 0.2625
   },
   {
    "task_id": "retail_stack_ticket_queue",
    "model": "claude-sonnet-5",
-   "n": 73,
-   "pass_rate": 0.9726027397260274
+   "n": 80,
+   "pass_rate": 0.975
   },
   {
    "task_id": "retail_threshold_refund",
@@ -1856,26 +1902,38 @@
   {
    "task_id": "stack_order_book",
    "model": "claude-haiku-4-5-20251001",
-   "n": 334,
-   "pass_rate": 0.655688622754491
+   "n": 365,
+   "pass_rate": 0.6575342465753424
   },
   {
    "task_id": "stack_order_book",
    "model": "claude-sonnet-5",
-   "n": 334,
-   "pass_rate": 0.9640718562874252
+   "n": 365,
+   "pass_rate": 0.9643835616438357
+  },
+  {
+   "task_id": "stack_recurrence",
+   "model": "claude-haiku-4-5-20251001",
+   "n": 3,
+   "pass_rate": 1.0
+  },
+  {
+   "task_id": "stack_recurrence",
+   "model": "claude-sonnet-5",
+   "n": 3,
+   "pass_rate": 1.0
   },
   {
    "task_id": "stack_resolve_path",
    "model": "claude-haiku-4-5-20251001",
-   "n": 341,
-   "pass_rate": 0.6891495601173021
+   "n": 372,
+   "pass_rate": 0.6854838709677419
   },
   {
    "task_id": "stack_resolve_path",
    "model": "claude-sonnet-5",
-   "n": 341,
-   "pass_rate": 0.8357771260997068
+   "n": 372,
+   "pass_rate": 0.8333333333333334
   },
   {
    "task_id": "top_k_words",
@@ -1890,7 +1948,7 @@
    "pass_rate": 1.0
   }
  ],
- "generated": "2026-09-28T22:57:44.992934+00:00",
+ "generated": "2026-09-28T23:34:05.878151+00:00",
  "total_cap": 1950,
  "stopped": null
 }
