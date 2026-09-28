@@ -15,7 +15,7 @@ prices:
   claude-opus-5:            {input: 5.00, output: 25.00, cache_read: 0.50, cache_write: 6.25}   # reference labeler only; batch discount not applied
 budget:
   total_cap_usd: 1950
-  daily_cap_usd: 10              # 25 on 2026-09-27 only, to partly cover the four nights missed 09-24..26
+  daily_cap_usd: 18              # 18 for the second 2026-09-28 run ($28 total that day, user asked for 20-30); 10 otherwise
   end_date: "2026-11-01"         # set to ~8 weeks from first run
   min_nightly_usd: 2             # below this the scheduler just exits
   nightly_deadline_seconds: 18000  # 5h: a stalled night must not block the next one
